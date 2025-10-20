@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
-import User from "../models/userModel.js";
+import asyncHandler from "express-async-handler";
+import User from "../models/User.js";
 
-// Middleware to protect routes
-const protect = async (req, res, next) => {
+export const protect = asyncHandler(async (req, res, next) => {
   let token;
 
   if (
@@ -16,17 +16,19 @@ const protect = async (req, res, next) => {
 
       req.user = await User.findById(decoded.id).select("-password");
 
+      if (!req.user) {
+        res.status(401);
+        throw new Error("User not found, token invalid");
+      }
+
       next();
     } catch (error) {
+      console.error("Auth error:", error.message);
       res.status(401);
       throw new Error("Not authorized, token failed");
     }
-  }
-
-  if (!token) {
+  } else {
     res.status(401);
-    throw new Error("Not authorized, no token");
+    throw new Error("Not authorized, no token provided");
   }
-};
-
-export { protect };
+});
