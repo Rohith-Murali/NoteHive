@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import cors from "cors";
 import connectDB from "./config/db.js";
-import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -11,17 +11,20 @@ connectDB();
 
 const app = express();
 
-app.use(helmet()); // Secure HTTP headers
-app.use(cors()); // Enable CORS for frontend communication
-app.use(express.json()); // Parse JSON requests
-app.use(express.urlencoded({ extended: true })); // Parse form data
+app.use(helmet());
+app.use(cors({
+  origin: "http://localhost:3000", 
+  credentials: true, 
+}));
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 // Example route
 app.get("/", (req, res) => {
     res.send("NoteHive API is running...");
 });
 // Routes
-app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 
 // Error handlers

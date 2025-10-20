@@ -4,7 +4,7 @@ import {
   loginUser,
   refreshAccessToken,
   logoutUser,
-} from "../services/userService.js";
+} from "../services/authService.js";
 
 // Register
 const register = asyncHandler(async (req, res) => {
