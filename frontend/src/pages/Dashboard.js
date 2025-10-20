@@ -1,21 +1,15 @@
-import { useDispatch } from "react-redux";
-import { logout } from "../features/auth/authSlice";
-
 export default function Dashboard() {
-    const dispatch = useDispatch();
-
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-            <div className="bg-white shadow-lg p-8 rounded-lg w-96 text-center">
-                <h1 className="text-2xl font-bold mb-4">Welcome to NoteHive 🐝</h1>
-                <p className="mb-6">You are successfully logged in!</p>
-                <button
-                    onClick={() => dispatch(logout())}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+        <div className="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
+            {[1, 2, 3].map((i) => (
+                <div
+                    key={i}
+                    className="p-4 border border-secondary rounded-xl hover:shadow-md bg-white"
                 >
-                    Logout
-                </button>
-            </div>
+                    <h3 className="text-lg font-semibold mb-2">Sample Note {i}</h3>
+                    <p className="text-sm text-secondary">This is a sample note preview.</p>
+                </div>
+            ))}
         </div>
-    );
+    )
 }

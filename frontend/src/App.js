@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
+import Layout from "./components/Layout";
 
 function App() {
   return (
@@ -13,8 +14,17 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Private */}
+        {/* Private routes are wrapped by PrivateRoute, then by Layout so all private pages share the layout */}
         <Route element={<PrivateRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            element={
+              <Layout>
+                <Outlet />
+              </Layout>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
         </Route>
 
         {/* Default redirect */}

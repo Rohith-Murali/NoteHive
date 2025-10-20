@@ -1,13 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Optional: add global styles */
-body {
-    @apply bg-gray-50 text-gray-900;
+:root {
+  --font-family: "Poppins", sans-serif;
+  --bg-color: #f8f9fb;
+  --card-bg: #ffffff;
+  --text-color: #1a1a1a;
+  --primary-color: #6c63ff; /* NotePlus violet */
+  --secondary-color: #f3f4f6;
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-input,
-button {
-    @apply outline-none;
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
