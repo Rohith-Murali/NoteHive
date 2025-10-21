@@ -1,6 +1,16 @@
-import { FiEdit3, FiFileText, FiBell, FiTag, FiTrash2, FiBook } from "react-icons/fi";
+import { FiEdit3, FiFileText, FiBell, FiTag, FiTrash2, FiBook, FiLogOut } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { logout } from "../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login"); // redirect after logout
+  };
   return (
     <aside className="w-64 bg-white h-screen shadow-md flex flex-col justify-between fixed left-0 top-0 p-5">
       {/* Logo */}
@@ -26,6 +36,11 @@ export default function Sidebar() {
           </button>
           <button className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition">
             <FiTrash2 /> Bin
+          </button>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-red-500 hover:bg-[var(--secondary-color)] transition">
+            <FiLogOut /> Logout
           </button>
         </nav>
       </div>

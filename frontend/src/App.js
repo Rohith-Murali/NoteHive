@@ -4,6 +4,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./components/Layout";
+import NotesPage from "./pages/NotesPage";
+import TasksPage from "./pages/TasksPage";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/notes/:id" element={<NotesPage />} />
+            <Route path="/tasks/:id" element={<TasksPage />} />
           </Route>
         </Route>
 
