@@ -2,7 +2,7 @@ import { FiSearch, FiBell, FiSettings } from "react-icons/fi";
 
 export default function Topbar() {
   return (
-    <header className="w-full flex items-center justify-between bg-white shadow-sm px-6 py-3 rounded-lg mb-5">
+    <header className="w-full flex items-center justify-between bg-white shadow-sm px-6 py-3 rounded-lg mb-2">
       {/* Search bar */}
       <div className="flex items-center gap-2 w-1/2 bg-[var(--secondary-color)] px-3 py-2 rounded-lg">
         <FiSearch className="text-gray-500" />

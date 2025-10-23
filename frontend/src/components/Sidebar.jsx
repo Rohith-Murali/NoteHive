@@ -19,14 +19,17 @@ export default function Sidebar() {
 
         {/* Menu */}
         <nav className="space-y-3">
+           <button className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition"
+           onClick={()=>{
+            navigate('/')
+           }}>
+            <FiBook /> Notebooks
+          </button>
           <button className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition">
             <FiEdit3 /> Add New
           </button>
           <button className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition">
             <FiFileText /> Your Notes
-          </button>
-          <button className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition">
-            <FiBook /> Notebooks
           </button>
           <button className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition">
             <FiBell /> Reminders
