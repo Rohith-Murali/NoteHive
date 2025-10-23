@@ -1,29 +1,16 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
 import {
   createNote,
   getNotes,
-  getNoteById,
+  getNote,
   updateNote,
   deleteNote,
-  addTask, updateTask, deleteTask,toggleTask
 } from "../controllers/noteController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
-const router = express.Router();
-
-router.route("/")
-  .get(protect, getNotes)
-  .post(protect, createNote);
-
-router.route("/:id")
-  .get(protect, getNoteById)
-  .put(protect, updateNote)
-  .delete(protect, deleteNote);
-
-router.post("/:noteId/tasks", protect, addTask);
-router.put("/:noteId/tasks/:taskId", protect, updateTask);
-router.delete("/:noteId/tasks/:taskId", protect, deleteTask);
-router.patch("/:noteId/tasks/:taskId/toggle", protect, toggleTask);
-
+const router = express.Router({ mergeParams: true });
+router.use(protect);
+router.route("/").get(getNotes).post(createNote);
+router.route("/:noteId").get(getNote).put(updateNote).delete(deleteNote);
 
 export default router;
