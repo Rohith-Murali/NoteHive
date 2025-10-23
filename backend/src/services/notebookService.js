@@ -14,7 +14,6 @@ export const getNotebookByIdService = async (userId, notebookId) => {
   return notebook;
 };
 
-// Update and Delete same pattern: filter by user
 export const updateNotebookService = async (userId, notebookId, data) => {
   const notebook = await Notebook.findOne({ _id: notebookId, user: userId });
   if (!notebook) throw new Error("Notebook not found");
@@ -24,8 +23,7 @@ export const updateNotebookService = async (userId, notebookId, data) => {
 };
 
 export const deleteNotebookService = async (userId, notebookId) => {
-  const notebook = await Notebook.findOne({ _id: notebookId, user: userId });
+  const notebook = await Notebook.findByIdAndDelete({ _id: notebookId, user: userId });
   if (!notebook) throw new Error("Notebook not found");
-  await notebook.remove();
   return { message: "Notebook deleted" };
 };

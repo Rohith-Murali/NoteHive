@@ -24,9 +24,8 @@ export const updateTaskService = async (userId, taskId, data) => {
 };
 
 export const deleteTaskService = async (userId, taskId) => {
-  const task = await Task.findOne({ _id: taskId, user: userId });
+  const task = await Notebook.findByIdAndDelete({ _id: taskId, user: userId });
   if (!task) throw new Error("Task not found");
-  await task.remove();
   return { message: "Task deleted" };
 };
 

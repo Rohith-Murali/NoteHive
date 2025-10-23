@@ -23,9 +23,8 @@ export const updateNoteService = async (userId, noteId, data) => {
 };
 
 export const deleteNoteService = async (userId, noteId) => {
-  const note = await Note.findOne({ _id: noteId, user: userId });
+  const note = await Notebook.findByIdAndDelete({ _id: noteId, user: userId });
   if (!note) throw new Error("Note not found");
-  await note.remove();
   return { message: "Note deleted" };
 };
 
