@@ -15,7 +15,7 @@ export default function Login() {
         e.preventDefault();
         dispatch(login(form)).then((res) => {
             if (res.meta.requestStatus === "fulfilled") {
-                navigate("/dashboard");
+                navigate("/");
             }
         });
     };

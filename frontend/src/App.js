@@ -6,6 +6,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./components/Layout";
 import NotesPage from "./pages/NotesPage";
 import TasksPage from "./pages/TasksPage";
+import NotebookPage from "./pages/NotebookPage";
 
 function App() {
   return (
@@ -25,9 +26,10 @@ function App() {
               </Layout>
             }
           >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/notes/:id" element={<NotesPage />} />
-            <Route path="/tasks/:id" element={<TasksPage />} />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/notebook/:notebookId" element={<NotebookPage />} />
+            <Route path="/notebook/:notebookId/notes/:noteId" element={<NotesPage />} />
+            <Route path="/notebook/:notebookId/tasks/:taskId" element={<TasksPage />} />
           </Route>
         </Route>
 

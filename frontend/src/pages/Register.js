@@ -15,7 +15,7 @@ export default function Register() {
         e.preventDefault();
         dispatch(register(form)).then((res) => {
             if (res.meta.requestStatus === "fulfilled") {
-                navigate("/dashboard");
+                navigate("/");
             }
         });
     };
