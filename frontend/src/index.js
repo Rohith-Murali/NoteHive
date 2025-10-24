@@ -7,6 +7,7 @@ import {store} from "./app/store.js";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-quill-new/dist/quill.snow.css";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(

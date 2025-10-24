@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import NoteCard from "../components/NoteCard";
+import ConfirmDialog from "../components/ConfirmDialog";
 import api from "../services/axios";
+import { FaPlus, FaSort, FaFilter } from "react-icons/fa";
 
 export default function NotebookPage() {
     const { notebookId } = useParams();
     const navigate = useNavigate();
+
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
 
+    const [sortOption, setSortOption] = useState("date");
+    const [filter, setFilter] = useState("all");
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    // Edit/Delete modal states
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedType, setSelectedType] = useState(null);
+
     useEffect(() => {
-        const fetchAll = async () => {
+        const fetchData = async () => {
             try {
                 const notesRes = await api.get(`/notebook/${notebookId}/notes`);
                 const tasksRes = await api.get(`/notebook/${notebookId}/tasks`);
@@ -20,30 +33,57 @@ export default function NotebookPage() {
                 console.error("Fetch error:", err);
             }
         };
-        if (notebookId)
-            fetchAll();
+        if (notebookId) fetchData();
     }, [notebookId]);
 
-    const handleAddNote = async () => {
-        const title = prompt("Note title?");
-        if (!title) return;
-        const res = await api.post(`/notebook/${notebookId}/notes`, { title, content: "" });
-        setNotes((prev) => [...prev, res.data]);
+    // Sort logic
+    const sortItems = (arr) => {
+        if (sortOption === "name") {
+            return [...arr].sort((a, b) => a.title.localeCompare(b.title));
+        } else {
+            return [...arr].sort(
+                (a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+            );
+        }
     };
 
-    const handleAddTask = async () => {
-        const title = prompt("Task group title?");
-        if (!title) return;
-        const res = await api.post(`/notebook/${notebookId}/tasks`, {
-            tasks: [{ title }],
-        });
-        setTasks((prev) => [...prev, res.data]);
+    // Filter + sort
+    const visibleNotes = (filter === "all" || filter === "notes") ? sortItems(notes) : [];
+    const visibleTasks = (filter === "all" || filter === "tasks") ? sortItems(tasks) : [];
+
+    // Handlers
+    const handleAddNote = () => navigate(`/notebook/${notebookId}/notes/new`);
+    const handleAddTask = () => navigate(`/notebook/${notebookId}/tasks/new`);
+
+    const handleOpenItem = (item) => {
+        if (item.type === "text") navigate(`/notebook/${notebookId}/notes/${item._id}`);
+        else navigate(`/notebook/${notebookId}/tasks/${item._id}`);
+    };
+
+    const handleDelete = (item, type) => {
+        setSelectedItem(item);
+        setSelectedType(type);
+        setShowConfirm(true);
+    };
+
+    const confirmDelete = async () => {
+        try {
+            await api.delete(`/notebook/${notebookId}/${selectedType}/${selectedItem._id}`);
+            if (selectedType === "notes")
+                setNotes(notes.filter((n) => n._id !== selectedItem._id));
+            else
+                setTasks(tasks.filter((t) => t._id !== selectedItem._id));
+        } catch (err) {
+            console.error("Delete error:", err);
+        }
+        setShowConfirm(false);
     };
 
     return (
-        <div className="flex h-screen">
+        <div className={`flex h-screen ${showConfirm ? "backdrop-blur-sm" : ""}`}>
             <Sidebar />
-            <main className="flex-1 overflow-y-auto p-6">
+
+            <main className="flex-1 overflow-y-auto p-6 relative">
                 <button
                     onClick={() => navigate(-1)}
                     className="mb-4 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
@@ -51,44 +91,96 @@ export default function NotebookPage() {
                     ← Back
                 </button>
 
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Notes</h2>
-                    <button onClick={handleAddNote} className="bg-blue-600 text-white px-3 py-2 rounded-lg">
-                        + Add Note
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-                    {notes.map((note) => (
-                        <div
-                            key={note._id}
-                            className="border p-4 rounded-lg hover:bg-gray-100 cursor-pointer"
-                            onClick={() => navigate(`/notebook/${notebookId}/notes/${note._id}`)}
+                {/* Header bar */}
+                <div className="flex justify-between items-center mb-6 border-b pb-4">
+                    <div className="flex gap-4 items-center">
+                        {/* Sort */}
+                        <button
+                            className="flex items-center gap-2 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                            onClick={() => setSortOption(sortOption === "date" ? "name" : "date")}
                         >
-                            {note.title}
+                            <FaSort /> Sort by {sortOption === "date" ? "Date" : "Name"}
+                        </button>
+
+                        {/* Filter */}
+                        <div className="flex items-center gap-2">
+                            <FaFilter />
+                            <select
+                                value={filter}
+                                onChange={(e) => setFilter(e.target.value)}
+                                className="border px-3 py-2 rounded"
+                            >
+                                <option value="all">All</option>
+                                <option value="notes">Notes</option>
+                                <option value="tasks">Tasks</option>
+                            </select>
                         </div>
-                    ))}
-                </div>
+                    </div>
 
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Tasks</h2>
-                    <button onClick={handleAddTask} className="bg-blue-600 text-white px-3 py-2 rounded-lg">
-                        + Add Task Group
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    {tasks.map((task) => (
-                        <div
-                            key={task._id}
-                            className="border p-4 rounded-lg hover:bg-gray-100 cursor-pointer"
-                            onClick={() => navigate(`/notebook/${notebookId}/tasks/${task._id}`)}
+                    {/* Add Menu */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setMenuOpen(!menuOpen)}
+                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                         >
-                            {task.title || "Untitled Task Group"}
+                            <FaPlus /> Add
+                        </button>
+
+                        {menuOpen && (
+                            <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-md z-20">
+                                <button
+                                    onClick={() => {
+                                        handleAddNote();
+                                        setMenuOpen(false);
+                                    }}
+                                    className="block w-full px-4 py-2 hover:bg-gray-100 text-left"
+                                >
+                                    + Add Note
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleAddTask();
+                                        setMenuOpen(false);
+                                    }}
+                                    className="block w-full px-4 py-2 hover:bg-gray-100 text-left"
+                                >
+                                    + Add Task
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {[...visibleNotes, ...visibleTasks].map((item) => (
+                        <div key={item._id} className="relative group">
+                            <NoteCard
+                                note={{
+                                    ...item,
+                                    type: item.tasks ? "task" : "text",
+                                }}
+                                onOpen={handleOpenItem}
+                            />
+                            {/* Hover icons */}
+                            <div className="absolute top-2 right-2 flex">
+                                <button className="icon-btn delete" onClick={() => handleDelete(item, item.tasks ? "tasks" : "notes")}>
+                                    <i className="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
             </main>
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog
+                show={showConfirm}
+                title="Delete Confirmation"
+                message={`Are you sure you want to delete this ${selectedType}?`}
+                onConfirm={confirmDelete}
+                onCancel={() => setShowConfirm(false)}
+            />
         </div>
     );
 }

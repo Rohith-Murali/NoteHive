@@ -28,6 +28,8 @@ function App() {
           >
             <Route path="/" element={<Dashboard />} />
             <Route path="/notebook/:notebookId" element={<NotebookPage />} />
+            <Route path="/notebook/:notebookId/notes/new" element={<NotesPage />} />
+            <Route path="/notebook/:notebookId/tasks/new" element={<TasksPage />} />
             <Route path="/notebook/:notebookId/notes/:noteId" element={<NotesPage />} />
             <Route path="/notebook/:notebookId/tasks/:taskId" element={<TasksPage />} />
           </Route>
