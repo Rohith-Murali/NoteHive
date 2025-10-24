@@ -8,25 +8,12 @@ export default function NoteCard({ note, onOpen }) {
 
       {note.type === "text" ? (
         <p className="text-gray-700 text-sm whitespace-pre-line">
-          {note.content?.slice(0, 120)}
-          {note.content?.length > 120 && "..."}
+          Note
         </p>
       ) : (
-        <ul className="space-y-1">
-          {note.tasks?.slice(0, 4).map((t, i) => (
-            <li
-              key={i}
-              className={`text-sm ${
-                t.completed ? "line-through text-gray-400" : "text-gray-700"
-              }`}
-            >
-              • {t.text}
-            </li>
-          ))}
-          {note.tasks?.length > 4 && (
-            <li className="text-gray-400 text-xs">+ more...</li>
-          )}
-        </ul>
+        <p className="text-gray-700 text-sm whitespace-pre-line">
+          Tasks
+        </p>
       )}
     </div>
   );

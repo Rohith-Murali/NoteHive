@@ -41,8 +41,16 @@ export default function Dashboard() {
       console.error("Add error:", err);
     }
   };
+  const handleDelete = async (notebook) => {
+    setNotebookToDelete(notebook);
+    setShowDeleteConfirm(true);
+  }
 
-  const handleDelete = async () => {
+  const handleEdit = (notebook) => {
+    setEditNotebook(notebook);
+    
+  }
+  const confirmDelete = async () => {
     try {
       await api.delete(`/notebook/${notebookToDelete._id}`);
       setNotebooks((prev) =>
@@ -55,7 +63,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleEdit = async () => {
+  const confirmEdit = async () => {
     if (!editNotebook.title.trim()) return;
     try {
       const res = await api.put(`/notebook/${editNotebook._id}`, {
@@ -93,7 +101,7 @@ export default function Dashboard() {
                   <button className="icon-btn edit" onClick={() => handleEdit(notebook)}>
                     <i className="bi bi-pencil-square"></i>
                   </button>
-                  <button className="icon-btn delete" onClick={() => handleDelete(notebook._id)}>
+                  <button className="icon-btn delete" onClick={() => handleDelete(notebook)}>
                     <i className="bi bi-trash"></i>
                   </button>
                 </div>
@@ -146,16 +154,16 @@ export default function Dashboard() {
           onChange={(val) =>
             setEditNotebook((prev) => ({ ...prev, title: val }))
           }
-          onSave={handleEdit}
+          onSave={confirmEdit}
           onClose={() => setEditNotebook(null)}
-          onEnter={handleEdit}
+          onEnter={confirmEdit}
         />
 
         <ConfirmDialog
           show={showDeleteConfirm}
           title={`Delete “${notebookToDelete?.title}”?`}
           message="This action cannot be undone."
-          onConfirm={handleDelete}
+          onConfirm={confirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
         />
       </main>

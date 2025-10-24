@@ -152,7 +152,7 @@ export default function NotebookPage() {
                 </div>
 
                 {/* Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
                     {[...visibleNotes, ...visibleTasks].map((item) => (
                         <div key={item._id} className="relative group">
                             <NoteCard

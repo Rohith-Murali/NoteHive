@@ -1,20 +1,33 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css";
 import api from "../services/axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ReactQuill from "react-quill-new";
 
 export default function NotePage() {
   const { notebookId, noteId } = useParams();
   const navigate = useNavigate();
-  const [note, setNote] = useState({ title: "", content: "", updatedAt: "" });
+  const [note, setNote] = useState({ title: "", content: "" });
   const [lastSaved, setLastSaved] = useState(null);
+  const [currentNoteId, setCurrentNoteId] = useState(noteId || null);
+  const [dirty, setDirty] = useState(false); // track first typing
   const saveTimer = useRef(null);
 
-  // --- Fetch Note ---
+  // --- Handle change ---
+  const handleChange = (value, field = "content") => {
+    setNote(prev => ({ ...prev, [field]: value }));
+
+    // Only mark dirty if there is a title
+    if (!dirty && field === "title" && value.trim() !== "") {
+      setDirty(true);
+    } else if (!dirty && currentNoteId && field === "content") {
+      // existing note, typing content counts as dirty
+      setDirty(true);
+    }
+  };
   useEffect(() => {
+    if (!noteId) return; // New note, skip fetch
     const fetchNote = async () => {
       try {
         const res = await api.get(`/notebook/${notebookId}/notes/${noteId}`);
@@ -24,17 +37,25 @@ export default function NotePage() {
       }
     };
     fetchNote();
-  }, [notebookId, noteId]);
-
+  }, [noteId, notebookId]);
   // --- Autosave ---
   useEffect(() => {
-    if (!noteId || !note.title) return;
+    if (!dirty) return;           // don’t autosave until first typing
+    if (!notebookId) return;      // safety
+    if (note.title.trim() === "") return; // title is required
 
-    // debounce-like autosave (2s after stop typing)
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       try {
-        await api.put(`/notebook/${notebookId}/notes/${noteId}`, note);
+        let savedNote;
+        if (currentNoteId) {
+          // update existing note
+          savedNote = await api.put(`/notebook/${notebookId}/notes/${currentNoteId}`, note);
+        } else {
+          // create new note
+          savedNote = await api.post(`/notebook/${notebookId}/notes`, note);
+          setCurrentNoteId(savedNote.data._id);
+        }
         setLastSaved(new Date());
         toast.success("Note saved automatically", { autoClose: 1000 });
       } catch (err) {
@@ -44,9 +65,9 @@ export default function NotePage() {
     }, 2000);
 
     return () => clearTimeout(saveTimer.current);
-  }, [note, noteId, notebookId]);
+  }, [note, notebookId, currentNoteId, dirty]);
 
-  // --- Toolbar Options ---
+  // --- Toolbar options ---
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -77,6 +98,7 @@ export default function NotePage() {
   return (
     <div className="p-6">
       <ToastContainer position="bottom-right" theme="dark" />
+
       <button
         onClick={() => navigate(-1)}
         className="mb-4 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
@@ -87,7 +109,7 @@ export default function NotePage() {
       <div className="mb-4">
         <input
           value={note.title}
-          onChange={(e) => setNote({ ...note, title: e.target.value })}
+          onChange={(e) => handleChange(e.target.value, "title")}
           placeholder="Untitled Note"
           className="text-2xl font-semibold w-full mb-2 border-b p-2 focus:outline-none"
         />
@@ -99,13 +121,9 @@ export default function NotePage() {
       </div>
 
       <div className="relative">
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          {/* Quill toolbar automatically rendered here */}
-        </div>
-
         <ReactQuill
           value={note.content}
-          onChange={(value) => setNote({ ...note, content: value })}
+          onChange={(value) => handleChange(value)}
           modules={modules}
           formats={formats}
           placeholder="Start writing..."
