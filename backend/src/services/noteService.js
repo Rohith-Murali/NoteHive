@@ -27,18 +27,3 @@ export const deleteNoteService = async (userId, noteId) => {
   if (!note) throw new Error("Note not found");
   return { message: "Note deleted" };
 };
-
-
-export const toggleTaskCompletion = async (userId, taskId) => {
-  const note = await Note.findOne({ _id: noteId, user: userId });
-  if (!note) throw new Error("Note not found");
-  if (note.type !== "task") throw new Error("Note is not a task list");
-
-  const task = note.tasks.id(taskId);
-  if (!task) throw new Error("Task not found");
-
-  task.completed = !task.completed;
-  await note.save();
-
-  return note;
-};
