@@ -163,7 +163,7 @@ export default function NotebookPage() {
                                 onOpen={handleOpenItem}
                             />
                             {/* Hover icons */}
-                            <div className="absolute top-2 right-2 flex">
+                            <div className="absolute top-0 right-0 flex">
                                 <button className="icon-btn delete" onClick={() => handleDelete(item, item.tasks ? "tasks" : "notes")}>
                                     <i className="bi bi-trash"></i>
                                 </button>

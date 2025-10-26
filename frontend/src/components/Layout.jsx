@@ -1,12 +1,15 @@
+import { useState } from "react";
 import Sidebar from "./Sidebar";
-import Topbar from "./Topbar";
 
 export default function Layout({ children }) {
+  const [sidebarWidth, setSidebarWidth] = useState(256);
   return (
     <div className="flex">
-      <Sidebar />
-      <main className="flex-1 ml-64 p-6 bg-[var(--bg-color)] min-h-screen">
-        <Topbar />
+      <Sidebar onWidthChange={setSidebarWidth} />
+      <main
+        className="transition-all duration-300 p-6"
+        style={{ marginLeft: `${sidebarWidth}px`, width: `calc(100% - ${sidebarWidth}px)` }}
+      >
         {children}
       </main>
     </div>

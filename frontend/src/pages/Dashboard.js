@@ -5,6 +5,7 @@ import NoteCard from "../components/NoteCard";
 import EditModal from "../components/EditModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import api from "../services/axios";
+import { FaSort } from "react-icons/fa";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../app.css";
 
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [editNotebook, setEditNotebook] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [notebookToDelete, setNotebookToDelete] = useState(null);
+  const [sortOption, setSortOption] = useState("date");
   const navigate = useNavigate();
 
   const fetchNotebooks = async () => {
@@ -48,7 +50,7 @@ export default function Dashboard() {
 
   const handleEdit = (notebook) => {
     setEditNotebook(notebook);
-    
+
   }
   const confirmDelete = async () => {
     try {
@@ -77,6 +79,19 @@ export default function Dashboard() {
       console.error("Edit error:", err);
     }
   };
+  // Sort logic
+  const sortItems = (arr) => {
+    if (sortOption === "name") {
+      return [...arr].sort((a, b) => a.title.localeCompare(b.title));
+    } else {
+      return [...arr].sort(
+        (a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+      );
+    }
+  };
+
+  // Filter + sort
+  const visibleNotebooks = sortItems(notebooks);
 
   const handleOpen = (notebook) => {
     navigate(`/notebook/${notebook._id}`);
@@ -88,26 +103,38 @@ export default function Dashboard() {
       <main className="flex-1 overflow-y-auto p-6">
         <h1 className="text-2xl font-semibold mb-8">My Notebooks</h1>
 
-        {notebooks.length === 0 ? (
+        {visibleNotebooks.length === 0 ? (
           <p className="text-gray-500 text-center mt-10">
             No notebooks yet. Add one below!
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            {notebooks.map((notebook) => (
-              <div key={notebook._id} className="relative group">
-                <NoteCard note={notebook} onOpen={() => handleOpen(notebook)} />
-                <div className="absolute top-2 right-2 flex">
-                  <button className="icon-btn edit" onClick={() => handleEdit(notebook)}>
-                    <i className="bi bi-pencil-square"></i>
-                  </button>
-                  <button className="icon-btn delete" onClick={() => handleDelete(notebook)}>
-                    <i className="bi bi-trash"></i>
-                  </button>
+          <>
+            <div className="flex gap-4 items-cente mb-6 pb-6">
+              {/* Sort */}
+              <button
+                className="flex items-center gap-2 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={() => setSortOption(sortOption === "date" ? "name" : "date")}
+              >
+                <FaSort /> Sort by {sortOption === "date" ? "Date" : "Name"}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+              {visibleNotebooks.map((notebook) => (
+                <div key={notebook._id} className="relative group">
+                  <NoteCard note={notebook} onOpen={() => handleOpen(notebook)} />
+                  <div className="absolute top-0 right-0 flex">
+                    <button className="icon-btn edit" onClick={() => handleEdit(notebook)}>
+                      <i className="bi bi-pencil-square"></i>
+                    </button>
+                    <button className="icon-btn delete" onClick={() => handleDelete(notebook)}>
+                      <i className="bi bi-trash"></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Add Notebook Section */}
