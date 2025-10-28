@@ -12,6 +12,7 @@ const taskSchema = mongoose.Schema(
       },
     ],
     dueDate: { type: Date },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

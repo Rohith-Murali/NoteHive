@@ -5,7 +5,7 @@ export const createTask = async (userId, notebookId, data) => {
 };
 
 export const getTasksByNotebook = async (userId, notebookId) => {
-  return await Task.find({ user: userId, notebook: notebookId }).sort({ createdAt: -1 });
+  return await Task.find({ user: userId, notebook: notebookId, isDeleted: false }).sort({ createdAt: -1 });
 };
 
 export const getTaskById = async (userId, taskId) => {
@@ -24,10 +24,17 @@ export const updateTask = async (userId, taskId, data) => {
 };
 
 export const deleteTask = async (userId, taskId) => {
-  // findOneAndDelete when matching by id + user filter
   const task = await Task.findOneAndDelete({ _id: taskId, user: userId });
   if (!task) throw new Error("Task not found");
   return { message: "Task deleted" };
+};
+
+export const moveToTrashTask = async (userId, taskId) => {
+  const task = await Task.findOne({ _id: taskId, user: userId });
+  if (!task) throw new Error("Task not found");
+  task.isDeleted = !task.isDeleted;
+  await task.save();
+  return ({ message: "Moved to Bin" });
 };
 
 export const toggleTask = async (userId, taskId, subTaskId) => {

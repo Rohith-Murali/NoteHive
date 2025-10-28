@@ -6,6 +6,7 @@ const noteSchema = mongoose.Schema(
     notebook: { type: mongoose.Schema.Types.ObjectId, ref: "Notebook", required: true },
     title: { type: String, required: [true, "Note title is required"] },
     content: { type: String, default: "" },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

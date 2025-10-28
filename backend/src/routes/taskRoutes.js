@@ -8,7 +8,8 @@ import {
   toggleTask,
   addSubtask,
   updateSubtask,
-  deleteSubtask
+  deleteSubtask,
+  moveToTrashTask
 } from "../controllers/taskController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -16,6 +17,7 @@ const router = express.Router({ mergeParams: true });
 router.use(protect);
 router.route("/").get(getTasks).post(createTask);
 router.route("/:taskId").get(getTask).put(updateTask).delete(deleteTask);
+router.put("/:taskId/trash", moveToTrashTask);
 router.put("/:taskId/toggle", toggleTask);
 router.post("/task/:taskId/subtask", addSubtask);                  // create
 router.put("/task/:taskId/subtask/:subtaskId", updateSubtask);    // update

@@ -31,6 +31,11 @@ export const deleteTask = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+export const moveToTrashTask = asyncHandler(async (req, res) => {
+  const result = await taskService.moveToTrashTask(req.user._id, req.params.taskId);
+  res.json(result);
+});
+
 export const toggleTask = asyncHandler(async (req, res) => {
     const updatedSubTask = await taskService.toggleTask(req.user._id,req.params.taskId, req.body.subTaskId);
     res.json(updatedSubTask);

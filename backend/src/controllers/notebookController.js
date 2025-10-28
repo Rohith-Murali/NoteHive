@@ -33,3 +33,8 @@ export const deleteNotebook = asyncHandler(async (req, res) => {
   const result = await notebookService.deleteNotebookService(req.user._id, req.params.notebookId);
   res.json(result);
 });
+
+export const moveToTrashNotebook = asyncHandler(async (req, res) => {
+  const result = await notebookService.moveToTrashNotebookService(req.user._id, req.params.notebookId);
+  res.json(result);
+});

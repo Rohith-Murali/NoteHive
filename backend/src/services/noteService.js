@@ -5,7 +5,7 @@ export const createNoteService = async (userId, notebookId, data) => {
 };
 
 export const getNotesByNotebookService = async (userId, notebookId) => {
-  return await Note.find({ user: userId, notebook: notebookId }).sort({ createdAt: -1 });
+  return await Note.find({ user: userId, notebook: notebookId, isDeleted: false }).sort({ createdAt: -1 });
 };
 
 export const getNoteByIdService = async (userId, noteId) => {
@@ -26,4 +26,12 @@ export const deleteNoteService = async (userId, noteId) => {
   const note = await Note.findByIdAndDelete({ _id: noteId, user: userId });
   if (!note) throw new Error("Note not found");
   return { message: "Note deleted" };
+};
+
+export const moveToTrashNoteService = async (userId, noteId) => {
+  const note = await Note.findOne({ _id: noteId, user: userId });
+  if (!note) throw new Error("Note not found");
+  note.isDeleted = !note.isDeleted;
+  await note.save();
+  return ({ message: "Moved to Bin" });
 };

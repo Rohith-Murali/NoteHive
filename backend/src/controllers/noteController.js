@@ -34,3 +34,8 @@ export const deleteNote = asyncHandler(async (req, res) => {
   const result = await noteService.deleteNoteService(req.user._id,req.params.noteId);
   res.json(result);
 });
+
+export const moveToTrashNote = asyncHandler(async (req, res) => {
+  const result = await noteService.moveToTrashNoteService(req.user._id, req.params.noteId);
+  res.json(result);
+});

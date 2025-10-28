@@ -5,7 +5,8 @@ export const createNotebookService = async (userId, data) => {
 };
 
 export const getAllNotebooksService = async (userId) => {
-  return await Notebook.find({ user: userId }).sort({ createdAt: -1 });
+  const notebooks = await Notebook.find({ user: userId, isDeleted: false }).sort({ createdAt: -1 });
+  return notebooks; 
 };
 
 export const getNotebookByIdService = async (userId, notebookId) => {
@@ -26,4 +27,12 @@ export const deleteNotebookService = async (userId, notebookId) => {
   const notebook = await Notebook.findByIdAndDelete({ _id: notebookId, user: userId });
   if (!notebook) throw new Error("Notebook not found");
   return { message: "Notebook deleted" };
+};
+
+export const moveToTrashNotebookService = async (userId, notebookId) => {
+  const notebook = await Notebook.findOne({ _id: notebookId, user: userId });
+  if (!notebook) throw new Error("Notebook not found");
+  notebook.isDeleted = !notebook.isDeleted;
+  await notebook.save();
+  return ({ message: "Moved to Bin" });
 };
