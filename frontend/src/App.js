@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import NotesPage from "./pages/NotesPage";
 import TasksPage from "./pages/TasksPage";
 import NotebookPage from "./pages/NotebookPage";
+import TrashPage from "./pages/TrashPage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/notebook/:notebookId/tasks/new" element={<TasksPage />} />
             <Route path="/notebook/:notebookId/notes/:noteId" element={<NotesPage />} />
             <Route path="/notebook/:notebookId/tasks/:taskId" element={<TasksPage />} />
+            <Route path="/trash" element={<TrashPage />} />
           </Route>
         </Route>
 

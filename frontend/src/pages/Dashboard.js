@@ -8,6 +8,7 @@ import api from "../services/axios";
 import { FaSort } from "react-icons/fa";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../app.css";
+import {FiEdit3, FiTrash2 } from "react-icons/fi";
 
 export default function Dashboard() {
   const [notebooks, setNotebooks] = useState([]);
@@ -54,7 +55,7 @@ export default function Dashboard() {
   }
   const confirmDelete = async () => {
     try {
-      await api.delete(`/notebook/${notebookToDelete._id}`);
+      await api.put(`/notebook/${notebookToDelete._id}/trash`);
       setNotebooks((prev) =>
         prev.filter((n) => n._id !== notebookToDelete._id)
       );
@@ -124,11 +125,11 @@ export default function Dashboard() {
                 <div key={notebook._id} className="relative group">
                   <NoteCard note={notebook} onOpen={() => handleOpen(notebook)} />
                   <div className="absolute top-0 right-0 flex">
-                    <button className="icon-btn edit" onClick={() => handleEdit(notebook)}>
-                      <i className="bi bi-pencil-square"></i>
+                    <button className="p-2 rounded-full bg-green-100 hover:bg-green-200" onClick={() => handleEdit(notebook)}>
+                      <FiEdit3 />
                     </button>
-                    <button className="icon-btn delete" onClick={() => handleDelete(notebook)}>
-                      <i className="bi bi-trash"></i>
+                    <button className="p-2 rounded-full bg-red-100 hover:bg-red-200" onClick={() => handleDelete(notebook)}>
+                      <FiTrash2 />
                     </button>
                   </div>
                 </div>
@@ -188,8 +189,8 @@ export default function Dashboard() {
 
         <ConfirmDialog
           show={showDeleteConfirm}
-          title={`Delete “${notebookToDelete?.title}”?`}
-          message="This action cannot be undone."
+          title={`Move “${notebookToDelete?.title}” to trash?`}
+          message="The file will be moved to the Trash."
           onConfirm={confirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
         />

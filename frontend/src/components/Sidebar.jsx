@@ -51,7 +51,7 @@ export default function Sidebar({ onWidthChange }) {
     { icon: <FiEdit3 />, label: "Add New", path: "/new" },
     { icon: <FiFileText />, label: "Your Notes", path: "/notes" },
     { icon: <FiTag />, label: "Tags", path: "/tags" },
-    { icon: <FiTrash2 />, label: "Bin", path: "/bin" },
+    { icon: <FiTrash2 />, label: "Trash", path: "/trash" },
     {icon: <FiSettings />, label: "Settings", path: "/settings" }
   ];
 

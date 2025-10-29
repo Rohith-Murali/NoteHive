@@ -5,6 +5,7 @@ import NoteCard from "../components/NoteCard";
 import ConfirmDialog from "../components/ConfirmDialog";
 import api from "../services/axios";
 import { FaPlus, FaSort, FaFilter } from "react-icons/fa";
+import { FiTrash2 } from "react-icons/fi";
 
 export default function NotebookPage() {
     const { notebookId } = useParams();
@@ -12,6 +13,7 @@ export default function NotebookPage() {
 
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
+    const [notebook, setNotebook] = useState({});
 
     const [sortOption, setSortOption] = useState("date");
     const [filter, setFilter] = useState("all");
@@ -27,8 +29,10 @@ export default function NotebookPage() {
             try {
                 const notesRes = await api.get(`/notebook/${notebookId}/notes`);
                 const tasksRes = await api.get(`/notebook/${notebookId}/tasks`);
+                const notebookRes = await api.get(`/notebook/${notebookId}`);
                 setNotes(notesRes.data);
                 setTasks(tasksRes.data);
+                setNotebook(notebookRes.data);
             } catch (err) {
                 console.error("Fetch error:", err);
             }
@@ -68,7 +72,7 @@ export default function NotebookPage() {
 
     const confirmDelete = async () => {
         try {
-            await api.delete(`/notebook/${notebookId}/${selectedType}/${selectedItem._id}`);
+            await api.put(`/notebook/${notebookId}/${selectedType}/${selectedItem._id}/trash`);
             if (selectedType === "notes")
                 setNotes(notes.filter((n) => n._id !== selectedItem._id));
             else
@@ -91,6 +95,7 @@ export default function NotebookPage() {
                     ← Back
                 </button>
 
+                <h1 className="text-2xl font-semibold mb-8">{notebook.title}</h1>
                 {/* Header bar */}
                 <div className="flex justify-between items-center mb-6 border-b pb-4">
                     <div className="flex gap-4 items-center">
@@ -164,8 +169,8 @@ export default function NotebookPage() {
                             />
                             {/* Hover icons */}
                             <div className="absolute top-0 right-0 flex">
-                                <button className="icon-btn delete" onClick={() => handleDelete(item, item.tasks ? "tasks" : "notes")}>
-                                    <i className="bi bi-trash"></i>
+                                <button className="p-2 rounded-full bg-red-100 hover:bg-red-200" onClick={() => handleDelete(item, item.tasks ? "tasks" : "notes")}>
+                                    <FiTrash2 />
                                 </button>
                             </div>
                         </div>
@@ -177,7 +182,7 @@ export default function NotebookPage() {
             <ConfirmDialog
                 show={showConfirm}
                 title="Delete Confirmation"
-                message={`Are you sure you want to delete this ${selectedType}?`}
+                message={`Are you sure you want to move this ${selectedType} to the Trash?`}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowConfirm(false)}
             />
