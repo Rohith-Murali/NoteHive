@@ -7,10 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#2E3440",     // dark base
-        secondary: "#4C566A",   // accent
-        accent: "#88C0D0",      // highlight
-        background: "#ECEFF4",  // light bg
+        /* Map Tailwind color keys to CSS variables so themes can be swapped at runtime */
+        primary: 'var(--primary-color)',
+        secondary: 'var(--secondary-color)',
+        accent: 'var(--accent-color, #88C0D0)',
+        background: 'var(--bs-body-bg)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

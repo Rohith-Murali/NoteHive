@@ -15,18 +15,37 @@ import { logout } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function Sidebar({ onWidthChange }) {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const profileRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const actualCollapsed = collapsed && !hovered;
+  const actualCollapsed = collapsed && (!hovered || !isMobile);
+
+  // Responsive collapse/expand based on screen width
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 992) {
+        // below lg breakpoint
+        setCollapsed(true);
+        setIsMobile(true);
+      } else {
+        setCollapsed(false);
+        setIsMobile(false);
+      }
+    };
+
+    handleResize(); // run on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Notify parent layout (Dashboard, etc.) about width changes
   useEffect(() => {
-    const width = actualCollapsed ? 100 : 256; // w-20 vs w-64 in px
+    const width = actualCollapsed ? 100 : 256;
     if (onWidthChange) onWidthChange(width);
   }, [actualCollapsed, onWidthChange]);
 
@@ -52,18 +71,15 @@ export default function Sidebar({ onWidthChange }) {
     { icon: <FiFileText />, label: "Your Notes", path: "/notes" },
     { icon: <FiTag />, label: "Tags", path: "/tags" },
     { icon: <FiTrash2 />, label: "Trash", path: "/trash" },
-    {icon: <FiSettings />, label: "Settings", path: "/settings" }
+    { icon: <FiSettings />, label: "Settings", path: "/settings" },
   ];
 
   return (
     <aside
-      className={`${actualCollapsed ? "w-30" : "w-64"
-        } bg-white h-screen shadow-md flex flex-col justify-between fixed left-0 top-0 transition-all duration-300 z-50`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false)
-        setProfileMenuOpen(false);
-      }}
+      className={`${actualCollapsed ? "w-28" : "w-64"}
+        bg-sidebar h-screen shadow-md flex flex-col justify-between fixed left-0 top-0 transition-all duration-300 z-50`}
+      onMouseEnter={() => isMobile && setHovered(true)}
+      onMouseLeave={() => isMobile && setHovered(false)}
     >
       {/* Top Section */}
       <div className="flex flex-col p-4">
@@ -76,7 +92,7 @@ export default function Sidebar({ onWidthChange }) {
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-gray-600 hover:text-[var(--primary-color)]"
+            className="text-gray-500 hover:text-[var(--primary-color)]"
           >
             <FiMenu size={22} />
           </button>
@@ -88,7 +104,8 @@ export default function Sidebar({ onWidthChange }) {
             <button
               key={idx}
               onClick={() => navigate(item.path)}
-              className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition text-gray-700"
+              className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition"
+              style={{ color: "var(--text-color)" }}
             >
               {item.icon}
               {!actualCollapsed && <span>{item.label}</span>}
@@ -110,8 +127,12 @@ export default function Sidebar({ onWidthChange }) {
           />
           {!actualCollapsed && (
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-gray-800">Rohith Murali</p>
-              <p className="text-xs text-gray-500">View Options</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-color)" }}
+              >
+                Rohith Murali
+              </p>
             </div>
           )}
         </button>
@@ -119,8 +140,9 @@ export default function Sidebar({ onWidthChange }) {
         {/* Dropdown Menu */}
         {profileMenuOpen && (
           <div
-            className={`absolute bottom-16 left-0 bg-white shadow-lg border rounded-lg overflow-hidden transition-all duration-200 ${actualCollapsed ? "w-48 translate-x-10" : "w-full"
-              }`}
+            className={`absolute bottom-16 left-0 bg-sidebar shadow-lg border rounded-lg overflow-hidden transition-all duration-200 ${
+              actualCollapsed ? "w-48 translate-x-10" : "w-full"
+            }`}
             onMouseEnter={() => setProfileMenuOpen(true)}
             onMouseLeave={() => setProfileMenuOpen(false)}
           >
@@ -129,7 +151,6 @@ export default function Sidebar({ onWidthChange }) {
                 navigate("/profile");
                 setProfileMenuOpen(false);
               }}
-
               className="w-full flex items-center gap-3 py-2 px-3 text-left text-gray-700 hover:bg-[var(--secondary-color)]"
             >
               <FiUser /> View Profile

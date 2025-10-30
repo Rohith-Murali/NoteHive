@@ -101,7 +101,7 @@ export default function NotePage() {
 
       <button
         onClick={() => navigate(-1)}
-        className="mb-4 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+        className="mb-4 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
       >
         ← Back
       </button>
@@ -127,7 +127,7 @@ export default function NotePage() {
           modules={modules}
           formats={formats}
           placeholder="Start writing..."
-          className="h-[70vh] bg-white rounded-lg border shadow-sm"
+          className="h-[70vh] rounded-lg border shadow-sm"
         />
       </div>
     </div>

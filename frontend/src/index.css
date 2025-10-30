@@ -5,17 +5,145 @@
 @tailwind utilities;
 
 :root {
-  --font-family: "Poppins", sans-serif;
-  --bg-color: #f8f9fb;
+  --primary-color: #4f46e5;
+  --secondary-color: #e0e7ff;
   --card-bg: #ffffff;
-  --text-color: #1a1a1a;
-  --primary-color: #6c63ff; /* NotePlus violet */
-  --secondary-color: #f3f4f6;
-  --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  --card-border: #dee2e6;
+  --text-color: #212529;
+  --hover-bg: #f3f4f6;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --bs-body-bg: #f8fafc; 
+  --sidebar-bg: #ffffff;
+  --muted-text: #6b7280;
+  --danger-color: #dc3545;
+  --success-color: #10b981;
+  --success-bg: rgba(16,185,129,0.08);
+  --danger-bg: rgba(220,53,69,0.08);
 }
 
-body {
-  font-family: var(--font-family);
-  background-color: var(--bg-color);
-  color: var(--text-color);
+[data-bs-theme="light"] {
+  --primary-color: #4f46e5;
+  --secondary-color: #e0e7ff;
+  --card-bg: #ffffff;
+  --card-border: #dee2e6;
+  --text-color: #212529;
+  --hover-bg: #f3f4f6;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --bs-body-bg: #f8fafc;
+  --sidebar-bg: #ffffff;
+  --muted-text: #6b7280;
+  --success-color: #10b981;
+  --success-bg: rgba(16,185,129,0.08);
+  --danger-bg: rgba(220,53,69,0.08);
 }
+
+[data-bs-theme="dark"] {
+  --primary-color: #6366f1;
+  --secondary-color: #2a2d3e;
+  --card-bg: #0f1724; 
+  --card-border: #22232b;
+  --text-color: #e6eef8;
+  --hover-bg: #111216;
+  --shadow-color: rgba(0, 0, 0, 0.45);
+  --bs-body-bg: #0b1020;
+  --sidebar-bg: #071028;
+  --muted-text: #94a3b8;
+  --danger-color: #ff6b6b;
+  --success-color: #34d399;
+  --success-bg: rgba(52,211,153,0.06);
+  --danger-bg: rgba(255,107,107,0.06);
+}
+
+/* ===== Global Styles ===== */
+body {
+  font-family: "Poppins", system-ui, sans-serif;
+  background-color: var(--bs-body-bg);
+  color: var(--text-color);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ===== Cards ===== */
+.settings-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: all 0.3s ease;
+}
+
+.settings-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary-color);
+}
+
+/* ===== Section Headings ===== */
+.settings-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ===== Range Slider (font size) ===== */
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+/* ===== Theme-aware utility overrides =====
+   These map a small set of commonly-used Tailwind utility classes to our
+   theme variables so components that use those utilities automatically
+   adapt to light/dark mode without editing every file.
+*/
+
+/* background helpers */
+.bg-gray-50 { background-color: var(--bs-body-bg) !important; }
+.bg-gray-100 { background-color: var(--hover-bg) !important; }
+.bg-gray-200 { background-color: var(--secondary-color) !important; }
+.bg-gray-300 { background-color: rgba(255,255,255,0.04) !important; }
+.bg-gray-400 { background-color: rgba(255,255,255,0.06) !important; }
+
+/* border helpers */
+.border-gray-200 { border-color: var(--card-border) !important; }
+
+/* text helpers */
+.text-gray-500 { color: var(--muted-text) !important; }
+.text-gray-700 { color: var(--text-color) !important; }
+.text-gray-800 { color: var(--text-color) !important; }
+.text-gray-600 { color: var(--muted-text) !important; }
+
+/* hover utilities (escaped colon) */
+.hover\:bg-gray-100:hover { background-color: var(--hover-bg) !important; }
+.hover\:bg-gray-200:hover { background-color: var(--secondary-color) !important; }
+.hover\:bg-gray-300:hover { background-color: rgba(255,255,255,0.06) !important; }
+
+/* green / success and red / danger helpers used by action buttons */
+.bg-green-100 { background-color: var(--success-bg) !important; }
+.hover\:bg-green-200:hover { background-color: rgba(16,185,129,0.14) !important; }
+.bg-green-100, .bg-red-100 { color: var(--text-color) !important; }
+.bg-red-100 { background-color: var(--danger-bg) !important; }
+.hover\:bg-red-200:hover { background-color: rgba(220,53,69,0.14) !important; }
+.bg-red-600 { background-color: var(--danger-color) !important; }
+.hover\:bg-red-700:hover { filter: brightness(0.9); }
+.bg-green-600 { background-color: var(--success-color) !important; }
+.hover\:bg-green-700:hover { filter: brightness(0.9); }
+
+/* shadow / card defaults */
+.shadow-sm { box-shadow: 0 1px 3px var(--shadow-color) !important; }
+.shadow-md { box-shadow: 0 6px 18px var(--shadow-color) !important; }
+
+/* make modal/popover backgrounds theme aware */
+.shadow-lg, .dropdown-content, .popover, .modal-content { background: var(--card-bg) !important; border-color: var(--card-border) !important; }
+
+/* Sidebar background helper (in case raw class used) */
+.sidebar-bg, .bg-sidebar { background-color: var(--sidebar-bg) !important; }
+
+/* Buttons colored with indigo/blue — map hover backgrounds to slightly darker variants */
+.bg-blue-600 { background-color: var(--primary-color) !important; }
+.hover\:bg-blue-700:hover { filter: brightness(0.92); }
+

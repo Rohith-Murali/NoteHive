@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
 import NoteCard from "../components/NoteCard";
 import ConfirmDialog from "../components/ConfirmDialog";
 import api from "../services/axios";
@@ -85,12 +84,10 @@ export default function NotebookPage() {
 
     return (
         <div className={`flex h-screen ${showConfirm ? "backdrop-blur-sm" : ""}`}>
-            <Sidebar />
-
             <main className="flex-1 overflow-y-auto p-6 relative">
                 <button
                     onClick={() => navigate(-1)}
-                    className="mb-4 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                    className="mb-4 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
                 >
                     ← Back
                 </button>
@@ -132,7 +129,7 @@ export default function NotebookPage() {
                         </button>
 
                         {menuOpen && (
-                            <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-md z-20">
+                            <div className="absolute right-0 mt-2 border rounded-lg bg-gray-200 shadow-md z-20">
                                 <button
                                     onClick={() => {
                                         handleAddNote();
@@ -158,6 +155,7 @@ export default function NotebookPage() {
 
                 {/* Cards Grid */}
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
+                    {[...visibleNotes, ...visibleTasks].length === 0 ?  <h1 className="text-xl font-semibold mb-8">Add new notes or tasks</h1> : ""}
                     {[...visibleNotes, ...visibleTasks].map((item) => (
                         <div key={item._id} className="relative group">
                             <NoteCard

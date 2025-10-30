@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
 import NoteCard from "../components/NoteCard";
 import api from "../services/axios";
 import { FiRotateCcw, FiTrash2 } from "react-icons/fi";
@@ -115,7 +114,6 @@ export default function TrashPage() {
 
   return (
     <div className="flex">
-      <Sidebar />
       <main className="flex-1 p-8 bg-gray-50 min-h-screen transition-all">
         <h1 className="text-2xl font-semibold mb-6">Bin</h1>
 

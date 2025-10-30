@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
 import NoteCard from "../components/NoteCard";
 import EditModal from "../components/EditModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import api from "../services/axios";
 import { FaSort } from "react-icons/fa";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import "../app.css";
 import {FiEdit3, FiTrash2 } from "react-icons/fi";
 
 export default function Dashboard() {
@@ -99,9 +97,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto p-6">
+    <div className="h-screen flex-1 overflow-y-auto p-6">
         <h1 className="text-2xl font-semibold mb-8">My Notebooks</h1>
 
         {visibleNotebooks.length === 0 ? (
@@ -194,7 +190,6 @@ export default function Dashboard() {
           onConfirm={confirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
         />
-      </main>
     </div>
   );
 }
