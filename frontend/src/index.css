@@ -62,38 +62,6 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* ===== Cards ===== */
-.settings-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px var(--shadow-color);
-  transition: all 0.3s ease;
-}
-
-.settings-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--primary-color);
-}
-
-/* ===== Section Headings ===== */
-.settings-section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-/* ===== Range Slider (font size) ===== */
-input[type="range"] {
-  width: 100%;
-  accent-color: var(--primary-color);
-  cursor: pointer;
-}
 
 /* ===== Theme-aware utility overrides =====
    These map a small set of commonly-used Tailwind utility classes to our

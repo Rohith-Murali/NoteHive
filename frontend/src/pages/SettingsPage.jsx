@@ -35,12 +35,6 @@ export default function SettingsPage() {
   return (
     <main
       className="transition-all duration-300 p-5"
-      style={{
-        minHeight: "100vh",
-        background: 'var(--bs-body-bg)',
-        color: 'var(--text-color)',
-        transition: "all 0.4s ease",
-      }}
     >
       <div
         className="container-fluid"
@@ -183,21 +177,6 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        .setting-card {
-          transition: all 0.3s ease;
-          border-radius: 15px;
-          backdrop-filter: blur(10px);
-          background: var(--card-bg);
-          color: var(--text-color);
-          border: 1px solid var(--card-border);
-        }
-        .setting-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 6px 18px var(--shadow-color);
-        }
-      `}</style>
     </main>
   );
 }
@@ -216,11 +195,7 @@ function SettingCard({ title, desc, right, body, theme }) {
   return (
     <div className="col-md-6 col-12">
       <div
-        className="card shadow-sm border-0 setting-card h-100"
-        style={{
-          background: 'var(--card-bg)',
-          color: 'var(--text-color)'
-        }}
+        className="card shadow-sm border-0 bg-gray-300 rounded hover:bg-gray-200"
       >
         <div className="card-body d-flex justify-content-between align-items-start flex-wrap">
           <div>

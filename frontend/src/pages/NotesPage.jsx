@@ -11,53 +11,69 @@ export default function NotePage() {
   const [note, setNote] = useState({ title: "", content: "" });
   const [lastSaved, setLastSaved] = useState(null);
   const [currentNoteId, setCurrentNoteId] = useState(noteId || null);
-  const [dirty, setDirty] = useState(false); // track first typing
+  const [initialNote, setInitialNote] = useState({ title: "", content: "" });
+  const [dirty, setDirty] = useState(false); // will only become true when actual change is made
   const saveTimer = useRef(null);
 
-  // --- Handle change ---
-  const handleChange = (value, field = "content") => {
-    setNote(prev => ({ ...prev, [field]: value }));
-
-    // Only mark dirty if there is a title
-    if (!dirty && field === "title" && value.trim() !== "") {
-      setDirty(true);
-    } else if (!dirty && currentNoteId && field === "content") {
-      // existing note, typing content counts as dirty
-      setDirty(true);
-    }
-  };
+  // --- Fetch Note from DB ---
   useEffect(() => {
-    if (!noteId) return; // New note, skip fetch
+    if (!noteId) return;
     const fetchNote = async () => {
       try {
         const res = await api.get(`/notebook/${notebookId}/notes/${noteId}`);
         setNote(res.data);
+        setInitialNote({
+          title: res.data.title || "",
+          content: res.data.content || "",
+        });
+        setLastSaved(res.data.updatedAt ? new Date(res.data.updatedAt) : null);
+        setDirty(false); // ensure autosave doesn't trigger on load
       } catch (err) {
         console.error("Error fetching note:", err);
       }
     };
     fetchNote();
   }, [noteId, notebookId]);
-  // --- Autosave ---
+
+  // --- Detect actual user edits ---
+  const handleChange = (value, field = "content") => {
+    setNote((prev) => ({ ...prev, [field]: value }));
+
+    // Mark dirty only when user changes something different from initial
+    if (
+      !dirty &&
+      ((field === "title" && value.trim() !== initialNote.title.trim()) ||
+        (field === "content" && value.trim() !== initialNote.content.trim()))
+    ) {
+      setDirty(true);
+    }
+  };
+
+  // --- Autosave (only if dirty and real change) ---
   useEffect(() => {
-    if (!dirty) return;           // don’t autosave until first typing
-    if (!notebookId) return;      // safety
-    if (note.title.trim() === "") return; // title is required
+    if (!dirty) return; // skip unless user edited
+    if (!notebookId) return;
+    if (note.title.trim() === "" && note.content.trim() === "") return;
 
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       try {
         let savedNote;
         if (currentNoteId) {
-          // update existing note
-          savedNote = await api.put(`/notebook/${notebookId}/notes/${currentNoteId}`, note);
+          savedNote = await api.put(
+            `/notebook/${notebookId}/notes/${currentNoteId}`,
+            { ...note, updatedAt: new Date() }
+          );
         } else {
-          // create new note
           savedNote = await api.post(`/notebook/${notebookId}/notes`, note);
           setCurrentNoteId(savedNote.data._id);
         }
-        setLastSaved(new Date());
-        toast.success("Note saved automatically", { autoClose: 1000 });
+
+        // Update UI with DB data
+        setLastSaved(new Date(savedNote.data.updatedAt || new Date()));
+        setInitialNote({ title: note.title, content: note.content });
+        setDirty(false);
+        toast.success("Note saved", { autoClose: 1000 });
       } catch (err) {
         console.error("Autosave failed:", err);
         toast.error("Autosave failed");
@@ -67,7 +83,7 @@ export default function NotePage() {
     return () => clearTimeout(saveTimer.current);
   }, [note, notebookId, currentNoteId, dirty]);
 
-  // --- Toolbar options ---
+  // --- Quill toolbar config ---
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -111,11 +127,11 @@ export default function NotePage() {
           value={note.title}
           onChange={(e) => handleChange(e.target.value, "title")}
           placeholder="Untitled Note"
-          className="text-2xl font-semibold w-full mb-2 border-b p-2 focus:outline-none"
+          className="text-2xl font-semibold w-full mb-2 border-b p-2 focus:outline-none bg-transparent"
         />
         {lastSaved && (
           <p className="text-sm text-gray-500">
-            Last edited {lastSaved.toLocaleTimeString()}
+            Last edited {lastSaved.toLocaleString()}
           </p>
         )}
       </div>
