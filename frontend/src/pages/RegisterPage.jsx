@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { register } from "../features/auth/authSlice";
+import { register } from "../redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function RegisterPage() {

@@ -1,13 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import authService from "./authService";
+import authService from "../../features/auth/authService"
 import { removeTokens } from "../../utils/token";
 
-// ✅ Safe localStorage load (prevents "undefined" crash)
 let userFromStorage = null;
 try {
   const storedUser = localStorage.getItem("user");
-  if (storedUser && storedUser !== "undefined") {
-    userFromStorage = JSON.parse(storedUser);
+  if (storedUser) {
+    const parsed = JSON.parse(storedUser);
+    if (parsed && typeof parsed === "object") {
+      userFromStorage = parsed;
+    } else {
+      localStorage.removeItem("user");
+    }
   }
 } catch (error) {
   console.error("Error parsing user from localStorage:", error);
@@ -41,6 +45,7 @@ export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
     if (response?.user) {
       localStorage.setItem("user", JSON.stringify(response.user));
     }
+    console.log(response)
     return response;
   } catch (error) {
     const message = error.response?.data?.message || "Login failed";

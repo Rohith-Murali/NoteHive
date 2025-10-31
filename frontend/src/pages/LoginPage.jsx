@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../features/auth/authSlice";
+import { login } from "../redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginPage() {

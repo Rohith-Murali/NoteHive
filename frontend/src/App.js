@@ -11,6 +11,7 @@ import TrashPage from "./pages/TrashPage";
 import SettingsPage from "./pages/SettingsPage";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const { theme, fontSize } = useSelector((state) => state.settings);
@@ -81,6 +82,7 @@ function App() {
             <Route path="/notebook/:notebookId/tasks/:taskId" element={<TasksPage />} />
             <Route path="/trash" element={<TrashPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>
 

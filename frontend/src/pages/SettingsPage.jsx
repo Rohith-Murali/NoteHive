@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
   return (
     <main
-      className="transition-all duration-300 p-5"
+      className="transition-all duration-300"
     >
       <div
         className="container-fluid"
@@ -193,7 +193,7 @@ function SectionHeader({ icon, title }) {
 /* 🔹 Reusable Setting Card */
 function SettingCard({ title, desc, right, body, theme }) {
   return (
-    <div className="col-md-6 col-12">
+    <div className="col-md-12 col-lg-12 border rounded p-2">
       <div
         className="card shadow-sm border-0 bg-gray-300 rounded hover:bg-gray-200"
       >

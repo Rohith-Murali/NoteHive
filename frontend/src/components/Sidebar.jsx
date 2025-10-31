@@ -10,8 +10,8 @@ import {
   FiLogOut,
   FiSettings,
 } from "react-icons/fi";
-import { useDispatch } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function Sidebar({ onWidthChange }) {
@@ -23,6 +23,7 @@ export default function Sidebar({ onWidthChange }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { user } = useSelector((state) => state.auth);
   const actualCollapsed = collapsed && (!hovered || !isMobile);
 
   // Responsive collapse/expand based on screen width
@@ -39,9 +40,10 @@ export default function Sidebar({ onWidthChange }) {
     };
 
     handleResize(); // run on mount
+    console.log(user)
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [user]);
 
   // Notify parent layout (Dashboard, etc.) about width changes
   useEffect(() => {
