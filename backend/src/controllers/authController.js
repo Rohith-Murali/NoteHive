@@ -4,6 +4,7 @@ import {
   loginUser,
   refreshAccessToken,
   logoutUser,
+  updatePassword
 } from "../services/authService.js";
 
 // Register
@@ -34,4 +35,10 @@ const logout = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
-export { register, login, refresh, logout };
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const result = await updatePassword(oldPassword, newPassword, req.user._id);
+  res.json({ message: "Password updated successfully" });
+});
+
+export { register, login, refresh, logout, changePassword };

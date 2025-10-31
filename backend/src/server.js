@@ -8,6 +8,7 @@ import noteRoutes from "./routes/noteRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import notebookRoutes from "./routes/notebookRoutes.js";
 import trashRoutes from "./routes/trashRoutes.js";
+import userDetailsRoutes from "./routes/userDetailsRoute.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use("/api/notebook", notebookRoutes);
 app.use("/api/notebook/:notebookId/notes", noteRoutes);
 app.use("/api/notebook/:notebookId/tasks", taskRoutes);
 app.use("/api/trash", trashRoutes);
+app.use("/api/userDetails", userDetailsRoutes);
 
 
 // Error handlers
