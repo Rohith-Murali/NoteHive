@@ -29,7 +29,8 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = getRefreshToken();
-        const res = await axios.post("http://localhost:5000/api/auth/refresh", { refreshToken });
+        // backend expects { token } in the body, so send under that key
+        const res = await api.post("/auth/refresh", { token: refreshToken });
         setAccessToken(res.data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
         return api(originalRequest);

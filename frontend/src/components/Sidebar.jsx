@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   FiMenu,
   FiTrash2,
@@ -14,9 +14,7 @@ import { useNavigate } from "react-router-dom";
 export default function Sidebar({ onWidthChange }) {
   const [collapsed, setCollapsed] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const profileRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -47,17 +45,6 @@ export default function Sidebar({ onWidthChange }) {
     if (onWidthChange) onWidthChange(width);
   }, [actualCollapsed, onWidthChange]);
 
-  // Close profile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
@@ -67,6 +54,7 @@ export default function Sidebar({ onWidthChange }) {
     { icon: <FiBook />, label: "Notebooks", path: "/" },
     { icon: <FiTrash2 />, label: "Trash", path: "/trash" },
     { icon: <FiSettings />, label: "Settings", path: "/settings" },
+    { icon: <FiUser />, label: "Profile", path: "/profile" }
   ];
 
   return (
@@ -110,54 +98,22 @@ export default function Sidebar({ onWidthChange }) {
       </div>
 
       {/* Profile Section */}
-      <div className="relative p-4 border-t" ref={profileRef}>
+      <div className="relative p-4 border-t">
         <button
           className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition"
-          onClick={() => setProfileMenuOpen((prev) => !prev)}
+          onClick={handleLogout}
         >
-          <img
-            src={`https://ui-avatars.com/api/?name=${user.name[0]}&background=6c63ff&color=fff`}
-            alt="Profile"
-            className="w-8 h-8 rounded-full object-cover"
-          />
           {!actualCollapsed && (
             <div className="flex-1 text-left">
               <p
                 className="text-sm font-medium"
                 style={{ color: "var(--text-color)" }}
               >
-                {user?.name || "User"}
+                <FiLogOut />Logout
               </p>
             </div>
           )}
         </button>
-
-        {/* Dropdown Menu */}
-        {profileMenuOpen && (
-          <div
-            className={`absolute bottom-16 left-0 bg-sidebar shadow-lg border rounded-lg overflow-hidden transition-all duration-200 ${
-              actualCollapsed ? "w-48 translate-x-10" : "w-full"
-            }`}
-            onMouseEnter={() => setProfileMenuOpen(true)}
-            onMouseLeave={() => setProfileMenuOpen(false)}
-          >
-            <button
-              onClick={() => {
-                navigate("/profile");
-                setProfileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 py-2 px-3 text-left text-gray-700 hover:bg-[var(--secondary-color)]"
-            >
-              <FiUser /> View Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 py-2 px-3 text-left text-red-500 hover:bg-[var(--secondary-color)]"
-            >
-              <FiLogOut /> Logout
-            </button>
-          </div>
-        )}
       </div>
     </aside>
   );

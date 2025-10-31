@@ -1,0 +1,76 @@
+NoteHive — Features & Usage
+
+Overview
+--------
+NoteHive is a personal notes and tasks web application composed of:
+- Backend: Node.js + Express + MongoDB (Mongoose). Provides REST endpoints for auth, notebooks, notes, and tasks.
+- Frontend: React + Tailwind + Redux. Provides a single-page UI to manage notebooks, notes, tasks, and user settings.
+
+Key Functionalities (User-facing)
+---------------------------------
+- Authentication
+  - Register and login using email + password.
+  - Access tokens and refresh tokens are stored in localStorage (accessToken, refreshToken) and a `user` object is persisted.
+
+- Notebooks
+  - Create notebooks to group notes.
+  - Rename, delete, and view notes inside a notebook.
+
+- Notes
+  - Create rich-text notes (Quill editor) and assign to a notebook.
+  - Edit, delete, and restore notes from trash (where supported).
+  - Notes list shows title and snippet; click to open editor.
+
+- Tasks
+  - Create tasks and group them (task groups / lists).
+  - Tasks support subtasks; toggle completion state and delete subtasks.
+  - Optimistic UI: subtasks can be added instantly and reconciled with the server.
+
+- Profile & Settings
+  - Profile page where you can view and edit name, email, and password actions.
+  - Settings include theme (Light/Dark/System) and font-size adjustments. Theme persists in settings (localStorage).
+
+- UI details
+  - Collapsible sidebar with responsive behavior.
+  - Toast notifications for success/failure messages.
+  - Centralized theme variables in CSS so dark-mode is widely supported.
+
+Developer / Power-User Usage
+---------------------------
+- Running locally (Windows cmd.exe examples):
+  1) Backend
+     cd NoteHive\backend
+     npm install
+     npm run dev
+     - The server listens on the configured PORT (default in .env: 5000). Create a `.env` with MONGO_URI and JWT secrets.
+
+  2) Frontend
+     cd NoteHive\frontend
+     npm install
+     npm start
+     - The frontend uses Create React App (react-scripts). If you change Tailwind config, restart the frontend dev server.
+
+- Important files
+  - Backend: `backend/src/server.js`, `backend/src/routes/` and `backend/src/services/`
+  - Frontend: `frontend/src/pages/` (pages), `frontend/src/components/` (shared UI), `frontend/src/redux/` (slices), `frontend/src/services/axios.js` (API base)
+
+Common Troubleshooting
+----------------------
+- "User becomes null on reload": open DevTools → Application → Local Storage and check the `user` entry. It must be a valid JSON object. If it's the literal string "null" or malformed JSON, the frontend will clear it.
+- Tokens: check `accessToken` and `refreshToken` keys in localStorage if requests fail with 401.
+- Tailwind/CSS not updating: restart `npm start` after editing `tailwind.config.js`.
+
+Developer Notes & Future Improvements
+------------------------------------
+- Consider using `redux-persist` for more robust auth rehydration.
+- Replace any remaining hard-coded hex colors with theme variables for consistent dark-mode support.
+- Add tests (unit & e2e). Consider Cypress for end-to-end tests.
+- Add a `.env.example` describing required environment variables for easier onboarding.
+
+Contact / Contribution
+----------------------
+- Create feature branches from `development` and open pull requests with a description and screenshots.
+- When contributing, try to keep styles consistent and prefer theme variables when changing colors.
+
+
+End of file
