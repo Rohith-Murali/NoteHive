@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
   FiMenu,
-  FiEdit3,
-  FiFileText,
-  FiTag,
   FiTrash2,
   FiBook,
   FiUser,
@@ -40,7 +37,6 @@ export default function Sidebar({ onWidthChange }) {
     };
 
     handleResize(); // run on mount
-    console.log(user)
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [user]);
@@ -69,9 +65,6 @@ export default function Sidebar({ onWidthChange }) {
 
   const menuItems = [
     { icon: <FiBook />, label: "Notebooks", path: "/" },
-    { icon: <FiEdit3 />, label: "Add New", path: "/new" },
-    { icon: <FiFileText />, label: "Your Notes", path: "/notes" },
-    { icon: <FiTag />, label: "Tags", path: "/tags" },
     { icon: <FiTrash2 />, label: "Trash", path: "/trash" },
     { icon: <FiSettings />, label: "Settings", path: "/settings" },
   ];
@@ -123,7 +116,7 @@ export default function Sidebar({ onWidthChange }) {
           onClick={() => setProfileMenuOpen((prev) => !prev)}
         >
           <img
-            src={`https://ui-avatars.com/api/?name=R+M&background=6c63ff&color=fff`}
+            src={`https://ui-avatars.com/api/?name=${user.name[0]}&background=6c63ff&color=fff`}
             alt="Profile"
             className="w-8 h-8 rounded-full object-cover"
           />
@@ -133,7 +126,7 @@ export default function Sidebar({ onWidthChange }) {
                 className="text-sm font-medium"
                 style={{ color: "var(--text-color)" }}
               >
-                Rohith Murali
+                {user?.name || "User"}
               </p>
             </div>
           )}

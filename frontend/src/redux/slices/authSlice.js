@@ -45,7 +45,6 @@ export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
     if (response?.user) {
       localStorage.setItem("user", JSON.stringify(response.user));
     }
-    console.log(response)
     return response;
   } catch (error) {
     const message = error.response?.data?.message || "Login failed";
