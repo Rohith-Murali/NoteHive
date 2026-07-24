@@ -4,41 +4,38 @@ import {
   loginUser,
   refreshAccessToken,
   logoutUser,
-  updatePassword
+  updatePassword,
 } from "../services/authService.js";
+import { sendSuccess } from "../utils/response.js";
 
-// Register
 const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
   const result = await registerUser({ name, email, password });
-  res.status(201).json(result);
+  return sendSuccess(res, 201, result, "User registered successfully");
 });
 
-// Login
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const result = await loginUser({ email, password });
-  res.json(result);
+  return sendSuccess(res, 200, result, "Login successful");
 });
 
-// Refresh token
 const refresh = asyncHandler(async (req, res) => {
   const { token } = req.body;
   const result = await refreshAccessToken(token);
-  res.json(result);
+  return sendSuccess(res, 200, result, "Token refreshed successfully");
 });
 
-// Logout
 const logout = asyncHandler(async (req, res) => {
   const { token } = req.body;
   const result = await logoutUser(token);
-  res.json(result);
+  return sendSuccess(res, 200, result, "Logged out successfully");
 });
 
 const changePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
   const result = await updatePassword(oldPassword, newPassword, req.user._id);
-  res.json({ message: "Password updated successfully" });
+  return sendSuccess(res, 200, result, "Password updated successfully");
 });
 
 export { register, login, refresh, logout, changePassword };
