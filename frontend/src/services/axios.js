@@ -41,10 +41,20 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+          throw new Error("No refresh token available");
+        }
+
         const res = await api.post("/auth/refresh", { token: refreshToken });
         const refreshedPayload = res.data?.data || res.data;
-        setAccessToken(refreshedPayload.accessToken);
-        originalRequest.headers.Authorization = `Bearer ${refreshedPayload.accessToken}`;
+        const newAccessToken = refreshedPayload?.accessToken;
+
+        if (!newAccessToken) {
+          throw new Error("Refresh response did not include an access token");
+        }
+
+        setAccessToken(newAccessToken);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         logApiError(refreshError, "AUTH_REFRESH");

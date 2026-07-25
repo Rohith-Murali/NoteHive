@@ -9,6 +9,11 @@ import logger from "../utils/logger.js";
 
 let refreshTokens = [];
 
+const rememberRefreshToken = (token) => {
+  if (!token) return;
+  if (!refreshTokens.includes(token)) refreshTokens.push(token);
+};
+
 const registerUser = async ({ name, email, password }) => {
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -27,7 +32,7 @@ const registerUser = async ({ name, email, password }) => {
 
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
-  refreshTokens.push(refreshToken);
+  rememberRefreshToken(refreshToken);
 
   logger.info(`User registered: ${user._id}`);
   return {
@@ -48,7 +53,7 @@ const loginUser = async ({ email, password }) => {
 
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
-  refreshTokens.push(refreshToken);
+  rememberRefreshToken(refreshToken);
   await UserDetails.findOneAndUpdate(
     { user: user._id },
     { lastLogin: new Date() },
@@ -66,11 +71,18 @@ const loginUser = async ({ email, password }) => {
 
 const refreshAccessToken = async (token) => {
   if (!token) throw new Error("No token provided");
-  if (!refreshTokens.includes(token)) throw new Error("Invalid refresh token");
 
-  const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-  logger.info(`Token refreshed for user: ${decoded.id}`);
-  return { accessToken: generateAccessToken(decoded.id) };
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    if (!decoded?.id) throw new Error("Invalid refresh token payload");
+
+    rememberRefreshToken(token);
+    logger.info(`Token refreshed for user: ${decoded.id}`);
+    return { accessToken: generateAccessToken(decoded.id) };
+  } catch (error) {
+    logger.warn(`Refresh token validation failed: ${error.message}`);
+    throw error;
+  }
 };
 
 const logoutUser = async (token) => {
