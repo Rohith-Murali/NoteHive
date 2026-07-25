@@ -255,106 +255,109 @@ export default function TaskPage() {
       >
         ← Back
       </button>
-
-      {isLoading && taskId && (
-        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <div>
-            <p className="text-sm font-medium text-slate-800">
-              Loading task...
-            </p>
-            <p className="text-xs text-slate-500">
-              Fetching the latest content.
-            </p>
+      {isLoading && taskId ? (
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+            <div>
+              <p className="text-sm font-medium text-slate-800">
+                Loading task...
+              </p>
+              <p className="text-xs text-slate-500">
+                Fetching the latest content.
+              </p>
+            </div>
           </div>
         </div>
-      )}
+      ) : (
+        <>
+          <input
+            value={taskGroup.title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            onBlur={async () => {
+              if (taskGroup.title && taskGroup.title.trim() !== "") {
+                await saveTaskGroup();
+              }
+            }}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (taskGroup.title && taskGroup.title.trim() !== "") {
+                  await saveTaskGroup();
+                }
+              }
+            }}
+            placeholder="Task Group Title"
+            className="text-2xl font-semibold w-full mb-4 border-b p-2 focus:outline-none"
+          />
 
-      <input
-        value={taskGroup.title}
-        onChange={(e) => handleTitleChange(e.target.value)}
-        onBlur={async () => {
-          if (taskGroup.title && taskGroup.title.trim() !== "") {
-            await saveTaskGroup();
-          }
-        }}
-        onKeyDown={async (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            if (taskGroup.title && taskGroup.title.trim() !== "") {
-              await saveTaskGroup();
-            }
-          }
-        }}
-        placeholder="Task Group Title"
-        className="text-2xl font-semibold w-full mb-4 border-b p-2 focus:outline-none"
-      />
+          <div className="space-y-2">
+            {(taskGroup.tasks || []).length === 0 ? (
+              <p className="text-gray-500">No subtasks yet. Add one below!</p>
+            ) : (
+              (taskGroup.tasks || []).map((t, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between items-center border p-2 rounded-lg"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={!!t.completed}
+                      onChange={() => handleToggle(i)}
+                      className="cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      value={t.title}
+                      onChange={(e) => handleSubtaskChange(i, e.target.value)}
+                      onBlur={() => handleSubtaskBlur(i)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          // blur will trigger save handler
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      className={`flex-1 bg-transparent border-none focus:outline-none ${
+                        t.completed ? "line-through text-gray-500" : ""
+                      }`}
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleDeleteSubtask(i)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✖
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
 
-      <div className="space-y-2">
-        {(taskGroup.tasks || []).length === 0 ? (
-          <p className="text-gray-500">No subtasks yet. Add one below!</p>
-        ) : (
-          (taskGroup.tasks || []).map((t, i) => (
-            <div
-              key={i}
-              className="flex justify-between items-center border p-2 rounded-lg"
+          {/* Add Task Input */}
+          <div className="mt-4 flex gap-2">
+            <input
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddSubtask();
+                }
+              }}
+              placeholder="New task..."
+              className="border rounded-lg px-3 py-2 flex-1"
+            />
+            <button
+              onClick={handleAddSubtask}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              <div className="flex items-center gap-3 flex-1">
-                <input
-                  type="checkbox"
-                  checked={!!t.completed}
-                  onChange={() => handleToggle(i)}
-                  className="cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={t.title}
-                  onChange={(e) => handleSubtaskChange(i, e.target.value)}
-                  onBlur={() => handleSubtaskBlur(i)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      // blur will trigger save handler
-                      e.currentTarget.blur();
-                    }
-                  }}
-                  className={`flex-1 bg-transparent border-none focus:outline-none ${
-                    t.completed ? "line-through text-gray-500" : ""
-                  }`}
-                />
-              </div>
-              <button
-                onClick={() => handleDeleteSubtask(i)}
-                className="text-red-500 hover:text-red-700"
-              >
-                ✖
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Add Task Input */}
-      <div className="mt-4 flex gap-2">
-        <input
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleAddSubtask();
-            }
-          }}
-          placeholder="New task..."
-          className="border rounded-lg px-3 py-2 flex-1"
-        />
-        <button
-          onClick={handleAddSubtask}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          + Add
-        </button>
-      </div>
+              + Add
+            </button>
+          </div>
+        </>
+      )}
       <ConfirmDialog
         show={showDeleteConfirm}
         title={`Delete “${subTaskToDelete?.title}”?`}

@@ -108,116 +108,121 @@ export default function NotebookPage() {
         >
           ← Back
         </button>
-
-        <h1 className="text-2xl font-semibold mb-8">{notebook.title}</h1>
-        {/* Header bar */}
-        <div className="flex justify-between items-center mb-6 border-b pb-4">
-          <div className="flex gap-4 items-center">
-            {/* Sort */}
-            <button
-              className="flex items-center gap-2 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              onClick={() =>
-                setSortOption(sortOption === "date" ? "name" : "date")
-              }
-            >
-              <FaSort /> Sort by {sortOption === "date" ? "Date" : "Name"}
-            </button>
-
-            {/* Filter */}
-            <div className="flex items-center gap-2">
-              <FaFilter />
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="border px-3 py-2 rounded"
-              >
-                <option value="all">All</option>
-                <option value="notes">Notes</option>
-                <option value="tasks">Tasks</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Add Menu */}
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              <FaPlus /> Add
-            </button>
-
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 border rounded-lg bg-gray-200 shadow-md z-20">
-                <button
-                  onClick={() => {
-                    handleAddNote();
-                    setMenuOpen(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-100 text-left"
-                >
-                  + Add Note
-                </button>
-                <button
-                  onClick={() => {
-                    handleAddTask();
-                    setMenuOpen(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-100 text-left"
-                >
-                  + Add Task
-                </button>
+        {isLoading ? (
+          <div className="flex h-[70vh] items-center justify-center">
+            {isLoading && (
+              <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                <div>
+                  <p className="text-sm font-medium text-slate-800">
+                    Loading notebook...
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Fetching the latest notes and tasks.
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        </div>
-
-        {isLoading && (
-          <div className="mb-4 flex items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-md ring-1 ring-gray-200">
-            <div className="h-5 w-5 animate-spin rounded-full border-[3px] border-blue-500 border-t-transparent" />
-            <div>
-              <p className="text-sm font-medium text-gray-800">
-                Loading notebook...
-              </p>
-              <p className="text-xs text-gray-500">
-                Please wait while we fetch your notes.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Cards Grid */}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
-          {!isLoading && [...visibleNotes, ...visibleTasks].length === 0 ? (
-            <h1 className="text-xl font-semibold mb-8">
-              Add new notes or tasks
-            </h1>
-          ) : (
-            ""
-          )}
-          {[...visibleNotes, ...visibleTasks].map((item) => (
-            <div key={item._id} className="relative group">
-              <NoteCard
-                note={{
-                  ...item,
-                  type: item.tasks ? "task" : "text",
-                }}
-                onOpen={handleOpenItem}
-              />
-              {/* Hover icons */}
-              <div className="absolute top-0 right-0 flex">
+        ) : (
+          <>
+            <h1 className="text-2xl font-semibold mb-8">{notebook.title}</h1>
+            {/* Header bar */}
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <div className="flex gap-4 items-center">
+                {/* Sort */}
                 <button
-                  className="p-2 rounded-full bg-red-100 hover:bg-red-200"
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
                   onClick={() =>
-                    handleDelete(item, item.tasks ? "tasks" : "notes")
+                    setSortOption(sortOption === "date" ? "name" : "date")
                   }
                 >
-                  <FiTrash2 />
+                  <FaSort /> Sort by {sortOption === "date" ? "Date" : "Name"}
                 </button>
+
+                {/* Filter */}
+                <div className="flex items-center gap-2">
+                  <FaFilter />
+                  <select
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="border px-3 py-2 rounded"
+                  >
+                    <option value="all">All</option>
+                    <option value="notes">Notes</option>
+                    <option value="tasks">Tasks</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Add Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  <FaPlus /> Add
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 border rounded-lg bg-gray-200 shadow-md z-20">
+                    <button
+                      onClick={() => {
+                        handleAddNote();
+                        setMenuOpen(false);
+                      }}
+                      className="block w-full px-4 py-2 hover:bg-gray-100 text-left"
+                    >
+                      + Add Note
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleAddTask();
+                        setMenuOpen(false);
+                      }}
+                      className="block w-full px-4 py-2 hover:bg-gray-100 text-left"
+                    >
+                      + Add Task
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Cards Grid */}
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
+              {!isLoading && [...visibleNotes, ...visibleTasks].length === 0 ? (
+                <h1 className="text-xl font-semibold mb-8">
+                  Add new notes or tasks
+                </h1>
+              ) : (
+                ""
+              )}
+              {[...visibleNotes, ...visibleTasks].map((item) => (
+                <div key={item._id} className="relative group">
+                  <NoteCard
+                    note={{
+                      ...item,
+                      type: item.tasks ? "task" : "text",
+                    }}
+                    onOpen={handleOpenItem}
+                  />
+                  {/* Hover icons */}
+                  <div className="absolute top-0 right-0 flex">
+                    <button
+                      className="p-2 rounded-full bg-red-100 hover:bg-red-200"
+                      onClick={() =>
+                        handleDelete(item, item.tasks ? "tasks" : "notes")
+                      }
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </main>
 
       {/* Confirm Dialog */}

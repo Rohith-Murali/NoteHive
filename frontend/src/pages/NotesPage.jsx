@@ -152,7 +152,7 @@ export default function NotePage() {
     }, SAVE_DELAY_MS);
 
     return () => clearTimeout(saveTimer.current);
-  }, [note, notebookId, currentNoteId, dirty]);
+  }, [note, notebookId, currentNoteId, dirty, titleTouched]);
 
   // --- Quill toolbar config ---
   const modules = {
@@ -191,48 +191,51 @@ export default function NotePage() {
       >
         ← Back
       </button>
-
-      <div className="mb-4">
-        <input
-          ref={titleInputRef}
-          value={note.title}
-          onChange={(e) => handleChange(e.target.value, "title")}
-          onBlur={handleTitleBlur}
-          placeholder="Untitled Note"
-          className="text-2xl font-semibold w-full mb-2 border-b p-2 focus:outline-none bg-transparent"
-          autoFocus={!noteId && !currentNoteId}
-        />
-        {lastSaved && (
-          <p className="text-sm text-gray-500">
-            Last edited {lastSaved.toLocaleString()}
-          </p>
-        )}
-      </div>
-
-      {isLoading && noteId && (
-        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <div>
-            <p className="text-sm font-medium text-slate-800">
-              Loading note...
-            </p>
-            <p className="text-xs text-slate-500">
-              Fetching the latest content.
-            </p>
+      {isLoading && noteId ? (
+        <div className="flex h-[70vh] items-center justify-center">
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+            <div>
+              <p className="text-sm font-medium text-slate-800">
+                Loading note...
+              </p>
+              <p className="text-xs text-slate-500">
+                Fetching the latest content.
+              </p>
+            </div>
           </div>
         </div>
-      )}
+      ) : (
+        <>
+          <div className="mb-4">
+            <input
+              ref={titleInputRef}
+              value={note.title}
+              onChange={(e) => handleChange(e.target.value, "title")}
+              onBlur={handleTitleBlur}
+              placeholder="Untitled Note"
+              className="text-2xl font-semibold w-full mb-2 border-b p-2 focus:outline-none bg-transparent"
+              autoFocus={!noteId && !currentNoteId}
+            />
+            {lastSaved && (
+              <p className="text-sm text-gray-500">
+                Last edited {lastSaved.toLocaleString()}
+              </p>
+            )}
+          </div>
 
-      <div className="relative">
-        <ReactQuill
-          value={note.content}
-          onChange={(value) => handleChange(value)}
-          modules={modules}
-          formats={formats}
-          placeholder="Start writing..."
-          className="h-[70vh] rounded-lg border shadow-sm"
-        />
-      </div>
+          <div className="relative">
+            <ReactQuill
+              value={note.content}
+              onChange={(value) => handleChange(value)}
+              modules={modules}
+              formats={formats}
+              placeholder="Start writing..."
+              className="h-[70vh] rounded-lg border shadow-sm"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
