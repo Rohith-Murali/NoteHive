@@ -14,7 +14,8 @@ export default function NotebookPage() {
 
   const [notes, setNotes] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [notebook, setNotebook] = useState({});
+  const [notebook, setNotebook] = useState({ title: "Loading..." });
+  const [isLoading, setIsLoading] = useState(true);
 
   const [sortOption, setSortOption] = useState("date");
   const [filter, setFilter] = useState("all");
@@ -27,16 +28,21 @@ export default function NotebookPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const notesRes = await api.get(`/notebook/${notebookId}/notes`);
-        const tasksRes = await api.get(`/notebook/${notebookId}/tasks`);
-        const notebookRes = await api.get(`/notebook/${notebookId}`);
+        const [notesRes, tasksRes, notebookRes] = await Promise.all([
+          api.get(`/notebook/${notebookId}/notes`),
+          api.get(`/notebook/${notebookId}/tasks`),
+          api.get(`/notebook/${notebookId}`),
+        ]);
         setNotes(unwrapData(notesRes.data));
         setTasks(unwrapData(tasksRes.data));
         setNotebook(unwrapData(notebookRes.data));
         logger.info("Notebook page data loaded", { notebookId });
       } catch (err) {
         logger.error("Fetch error:", getErrorMessage(err));
+      } finally {
+        setIsLoading(false);
       }
     };
     if (notebookId) fetchData();
@@ -166,9 +172,23 @@ export default function NotebookPage() {
           </div>
         </div>
 
+        {isLoading && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-md ring-1 ring-gray-200">
+            <div className="h-5 w-5 animate-spin rounded-full border-[3px] border-blue-500 border-t-transparent" />
+            <div>
+              <p className="text-sm font-medium text-gray-800">
+                Loading notebook...
+              </p>
+              <p className="text-xs text-gray-500">
+                Please wait while we fetch your notes.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Cards Grid */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
-          {[...visibleNotes, ...visibleTasks].length === 0 ? (
+          {!isLoading && [...visibleNotes, ...visibleTasks].length === 0 ? (
             <h1 className="text-xl font-semibold mb-8">
               Add new notes or tasks
             </h1>

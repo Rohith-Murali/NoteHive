@@ -13,6 +13,7 @@ export default function TaskPage() {
   const navigate = useNavigate();
   const [taskGroup, setTaskGroup] = useState({ title: "", tasks: [] });
   const [newTask, setNewTask] = useState("");
+  const [isLoading, setIsLoading] = useState(Boolean(taskId));
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [subTaskToDelete, setSubTaskToDelete] = useState(null);
   const [dirty, setDirty] = useState(false); // track typing
@@ -24,11 +25,14 @@ export default function TaskPage() {
   useEffect(() => {
     if (!taskId) return; // new task, skip fetch
     const fetchTask = async () => {
+      setIsLoading(true);
       try {
         const res = await api.get(`/notebook/${notebookId}/tasks/${taskId}`);
         setTaskGroup(unwrapData(res.data));
       } catch (err) {
         logger.error("Fetch error:", getErrorMessage(err));
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchTask();
@@ -48,14 +52,19 @@ export default function TaskPage() {
     }
 
     try {
+      const safeGroup = {
+        title: group.title?.trim() || "Untitled Task",
+        tasks: Array.isArray(group.tasks) ? group.tasks : [],
+      };
+
       let savedTask;
       if (currentTaskId) {
         savedTask = await api.put(
           `/notebook/${notebookId}/tasks/${currentTaskId}`,
-          group,
+          safeGroup,
         );
       } else {
-        savedTask = await api.post(`/notebook/${notebookId}/tasks`, group);
+        savedTask = await api.post(`/notebook/${notebookId}/tasks`, safeGroup);
         setCurrentTaskId(unwrapData(savedTask.data)._id);
       }
       const normalizedTask = unwrapData(savedTask.data);
@@ -77,24 +86,47 @@ export default function TaskPage() {
   };
 
   const handleAddSubtask = () => {
-    // allow adding locally; if the task group exists on the server we'll create the subtask there
+    const trimmedTitle = newTask.trim();
+    if (!trimmedTitle) {
+      toast.error("Subtask title cannot be empty");
+      return;
+    }
+
+    const optimisticSubtask = {
+      title: trimmedTitle,
+      tempId: Date.now().toString(),
+    };
+
     setTaskGroup((prev) => ({
       ...prev,
-      tasks: [...prev.tasks, { title: "" }],
+      tasks: [...(prev.tasks || []), optimisticSubtask],
     }));
-    // if group exists, create subtask on server immediately and replace group from response
+    setNewTask("");
+
     if (currentTaskId) {
       (async () => {
         try {
           const res = await api.post(
             `/notebook/${notebookId}/tasks/${currentTaskId}/subtask`,
-            { title: newTask },
+            { title: trimmedTitle },
           );
-          setTaskGroup(unwrapData(res.data));
-          setNewTask("");
+          setTaskGroup((prev) => {
+            const normalizedTask = unwrapData(res.data);
+            return normalizedTask &&
+              typeof normalizedTask === "object" &&
+              !Array.isArray(normalizedTask)
+              ? normalizedTask
+              : prev;
+          });
         } catch (err) {
           logger.error("Add subtask failed:", getErrorMessage(err));
           toast.error("Failed to add subtask");
+          setTaskGroup((prev) => ({
+            ...prev,
+            tasks: (prev.tasks || []).filter(
+              (task) => task.tempId !== optimisticSubtask.tempId,
+            ),
+          }));
         }
       })();
     }
@@ -223,6 +255,20 @@ export default function TaskPage() {
       >
         ← Back
       </button>
+
+      {isLoading && taskId && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <div>
+            <p className="text-sm font-medium text-slate-800">
+              Loading task...
+            </p>
+            <p className="text-xs text-slate-500">
+              Fetching the latest content.
+            </p>
+          </div>
+        </div>
+      )}
 
       <input
         value={taskGroup.title}
