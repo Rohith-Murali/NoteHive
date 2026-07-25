@@ -6,6 +6,7 @@ import {
   removeTokens,
 } from "../utils/token";
 import { logApiError, logger } from "../utils/logger";
+import { normalizeResponse } from "../utils/response";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
@@ -25,7 +26,14 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const normalized = normalizeResponse(response.data);
+    response.data = normalized;
+    logger.info(
+      `[API] ${response.config.method?.toUpperCase()} ${response.config.url} -> ${normalized.success ? "ok" : "error"}`,
+    );
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
@@ -34,8 +42,9 @@ api.interceptors.response.use(
       try {
         const refreshToken = getRefreshToken();
         const res = await api.post("/auth/refresh", { token: refreshToken });
-        setAccessToken(res.data.accessToken);
-        originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
+        const refreshedPayload = res.data?.data || res.data;
+        setAccessToken(refreshedPayload.accessToken);
+        originalRequest.headers.Authorization = `Bearer ${refreshedPayload.accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         logApiError(refreshError, "AUTH_REFRESH");

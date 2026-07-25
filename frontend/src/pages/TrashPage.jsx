@@ -3,9 +3,15 @@ import NoteCard from "../components/NoteCard";
 import api from "../services/axios";
 import { FiRotateCcw, FiTrash2 } from "react-icons/fi";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { logger } from "../utils/logger";
+import { unwrapData, getErrorMessage } from "../utils/response";
 
 export default function TrashPage() {
-  const [trashData, setTrashData] = useState({ notes: [], notebooks: [], tasks: [] });
+  const [trashData, setTrashData] = useState({
+    notes: [],
+    notebooks: [],
+    tasks: [],
+  });
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
@@ -17,9 +23,18 @@ export default function TrashPage() {
   const fetchTrash = async () => {
     try {
       const { data } = await api.get("/trash");
-      setTrashData(data);
+      const trashPayload = unwrapData(data) || {
+        notes: [],
+        notebooks: [],
+        tasks: [],
+      };
+      setTrashData({
+        notes: trashPayload.notes || [],
+        notebooks: trashPayload.notebooks || [],
+        tasks: trashPayload.tasks || [],
+      });
     } catch (error) {
-      console.error("Failed to fetch trash:", error);
+      logger.error("Failed to fetch trash:", getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -27,9 +42,9 @@ export default function TrashPage() {
 
   const handleDelete = async (type, notebook) => {
     setNotebookToDelete(notebook);
-    setDeleteType(type)
+    setDeleteType(type);
     setShowDeleteConfirm(true);
-  }
+  };
 
   const confirmRestore = async () => {
     try {
@@ -54,14 +69,16 @@ export default function TrashPage() {
 
       await api.put(`${endpoint}/trash`);
 
-      setTrashData(prev => ({
+      setTrashData((prev) => ({
         ...prev,
-        [restoreType + "s"]: prev[restoreType + "s"].filter(item => item._id !== notebookToRestore._id)
+        [restoreType + "s"]: prev[restoreType + "s"].filter(
+          (item) => item._id !== notebookToRestore._id,
+        ),
       }));
       setNotebookToRestore(null);
       setShowRestoreConfirm(false);
     } catch (error) {
-      console.error("Permanent delete failed:", error);
+      logger.error("Restore failed:", getErrorMessage(error));
     }
   };
 
@@ -69,7 +86,7 @@ export default function TrashPage() {
     setNotebookToRestore(notebook);
     setRestoreType(type);
     setShowRestoreConfirm(true);
-  }
+  };
 
   const confirmDelete = async () => {
     try {
@@ -94,35 +111,41 @@ export default function TrashPage() {
 
       await api.delete(endpoint);
 
-      setTrashData(prev => ({
+      setTrashData((prev) => ({
         ...prev,
-        [deleteType + "s"]: prev[deleteType + "s"].filter(item => item._id !== notebookToDelete._id)
+        [deleteType + "s"]: prev[deleteType + "s"].filter(
+          (item) => item._id !== notebookToDelete._id,
+        ),
       }));
       setNotebookToDelete(null);
       setShowDeleteConfirm(false);
     } catch (error) {
-      console.error("Permanent delete failed:", error);
+      logger.error("Permanent delete failed:", getErrorMessage(error));
     }
   };
-
 
   useEffect(() => {
     fetchTrash();
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
 
   return (
     <div className="flex">
       <main className="flex-1 p-8 bg-gray-50 min-h-screen transition-all">
         <h1 className="text-2xl font-semibold mb-6">Bin</h1>
 
-        {["notebooks", "notes", "tasks"].map(section => (
+        {["notebooks", "notes", "tasks"].map((section) => (
           <div key={section} className="mb-8">
             <h2 className="text-xl font-medium mb-4 capitalize">{section}</h2>
             {trashData[section].length > 0 ? (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
-                {trashData[section].map(item => (
+                {trashData[section].map((item) => (
                   <div key={item._id} className="relative group">
                     <NoteCard note={item} />
 
@@ -138,9 +161,7 @@ export default function TrashPage() {
                       </button>
 
                       <button
-                        onClick={() =>
-                          handleDelete(section.slice(0, -1), item)
-                        }
+                        onClick={() => handleDelete(section.slice(0, -1), item)}
                         className="p-2 rounded-full bg-red-100 hover:bg-red-200"
                         title="Delete Permanently"
                       >

@@ -4,6 +4,9 @@ import api from "../services/axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactQuill from "react-quill-new";
+import { logger } from "../utils/logger";
+import { unwrapData, getErrorMessage } from "../utils/response";
+import { validateMinLength } from "../utils/validation";
 
 export default function NotePage() {
   const { notebookId, noteId } = useParams();
@@ -21,15 +24,18 @@ export default function NotePage() {
     const fetchNote = async () => {
       try {
         const res = await api.get(`/notebook/${notebookId}/notes/${noteId}`);
-        setNote(res.data);
+        const fetchedNote = unwrapData(res.data);
+        setNote(fetchedNote);
         setInitialNote({
-          title: res.data.title || "",
-          content: res.data.content || "",
+          title: fetchedNote.title || "",
+          content: fetchedNote.content || "",
         });
-        setLastSaved(res.data.updatedAt ? new Date(res.data.updatedAt) : null);
+        setLastSaved(
+          fetchedNote.updatedAt ? new Date(fetchedNote.updatedAt) : null,
+        );
         setDirty(false); // ensure autosave doesn't trigger on load
       } catch (err) {
-        console.error("Error fetching note:", err);
+        logger.error("Error fetching note:", getErrorMessage(err));
       }
     };
     fetchNote();
@@ -54,6 +60,11 @@ export default function NotePage() {
     if (!dirty) return; // skip unless user edited
     if (!notebookId) return;
     if (note.title.trim() === "" && note.content.trim() === "") return;
+    const titleError = validateMinLength(note.title, 2, "Note title");
+    if (titleError) {
+      toast.error(titleError);
+      return;
+    }
 
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
@@ -62,20 +73,22 @@ export default function NotePage() {
         if (currentNoteId) {
           savedNote = await api.put(
             `/notebook/${notebookId}/notes/${currentNoteId}`,
-            { ...note, updatedAt: new Date() }
+            { ...note, updatedAt: new Date() },
           );
         } else {
           savedNote = await api.post(`/notebook/${notebookId}/notes`, note);
-          setCurrentNoteId(savedNote.data._id);
+          setCurrentNoteId(unwrapData(savedNote.data)._id);
         }
 
+        const savedPayload = unwrapData(savedNote.data);
+
         // Update UI with DB data
-        setLastSaved(new Date(savedNote.data.updatedAt || new Date()));
+        setLastSaved(new Date(savedPayload.updatedAt || new Date()));
         setInitialNote({ title: note.title, content: note.content });
         setDirty(false);
         toast.success("Note saved", { autoClose: 1000 });
       } catch (err) {
-        console.error("Autosave failed:", err);
+        logger.error("Autosave failed:", getErrorMessage(err));
         toast.error("Autosave failed");
       }
     }, 2000);

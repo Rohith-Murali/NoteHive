@@ -4,12 +4,15 @@ import api from "../services/axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { logger } from "../utils/logger";
+import { unwrapData, getErrorMessage } from "../utils/response";
+import { validateMinLength } from "../utils/validation";
 
 export default function TaskPage() {
   const { notebookId, taskId } = useParams();
   const navigate = useNavigate();
   const [taskGroup, setTaskGroup] = useState({ title: "", tasks: [] });
-  const [newTask, setNewTask] = useState("")
+  const [newTask, setNewTask] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [subTaskToDelete, setSubTaskToDelete] = useState(null);
   const [dirty, setDirty] = useState(false); // track typing
@@ -23,9 +26,9 @@ export default function TaskPage() {
     const fetchTask = async () => {
       try {
         const res = await api.get(`/notebook/${notebookId}/tasks/${taskId}`);
-        setTaskGroup(res.data);
+        setTaskGroup(unwrapData(res.data));
       } catch (err) {
-        console.error("Fetch error:", err);
+        logger.error("Fetch error:", getErrorMessage(err));
       }
     };
     fetchTask();
@@ -38,20 +41,30 @@ export default function TaskPage() {
       if (!currentTaskId) return null;
     }
 
+    const titleError = validateMinLength(group.title, 2, "Task title");
+    if (titleError) {
+      toast.error(titleError);
+      return null;
+    }
+
     try {
       let savedTask;
       if (currentTaskId) {
-        savedTask = await api.put(`/notebook/${notebookId}/tasks/${currentTaskId}`, group);
+        savedTask = await api.put(
+          `/notebook/${notebookId}/tasks/${currentTaskId}`,
+          group,
+        );
       } else {
         savedTask = await api.post(`/notebook/${notebookId}/tasks`, group);
-        setCurrentTaskId(savedTask.data._id);
+        setCurrentTaskId(unwrapData(savedTask.data)._id);
       }
-      setTaskGroup(savedTask.data);
+      const normalizedTask = unwrapData(savedTask.data);
+      setTaskGroup(normalizedTask);
       setDirty(false);
       toast.success("Task group saved", { autoClose: 1000 });
-      return savedTask.data;
+      return normalizedTask;
     } catch (err) {
-      console.error("Save failed:", err);
+      logger.error("Save failed:", getErrorMessage(err));
       toast.error("Save failed");
       return null;
     }
@@ -73,11 +86,14 @@ export default function TaskPage() {
     if (currentTaskId) {
       (async () => {
         try {
-          const res = await api.post(`/notebook/${notebookId}/tasks/task/${currentTaskId}/subtask`, { title: newTask });
-          setTaskGroup(res.data);
+          const res = await api.post(
+            `/notebook/${notebookId}/tasks/${currentTaskId}/subtask`,
+            { title: newTask },
+          );
+          setTaskGroup(unwrapData(res.data));
           setNewTask("");
         } catch (err) {
-          console.error("Add subtask failed:", err);
+          logger.error("Add subtask failed:", getErrorMessage(err));
           toast.error("Failed to add subtask");
         }
       })();
@@ -87,7 +103,9 @@ export default function TaskPage() {
   const handleSubtaskChange = (index, value) => {
     setTaskGroup((prev) => ({
       ...prev,
-      tasks: prev.tasks.map((t, i) => (i === index ? { ...t, title: value } : t)),
+      tasks: prev.tasks.map((t, i) =>
+        i === index ? { ...t, title: value } : t,
+      ),
     }));
     if (!dirty) setDirty(true);
   };
@@ -101,16 +119,22 @@ export default function TaskPage() {
     try {
       if (sub._id) {
         // update existing subtask
-        const res = await api.put(`/notebook/${notebookId}/tasks/task/${currentTaskId}/subtask/${sub._id}`, { title: sub.title, completed: !!sub.completed });
-        setTaskGroup(res.data);
+        const res = await api.put(
+          `/notebook/${notebookId}/tasks/${currentTaskId}/subtask/${sub._id}`,
+          { title: sub.title, completed: !!sub.completed },
+        );
+        setTaskGroup(unwrapData(res.data));
       } else {
         // create new subtask
-        const res = await api.post(`/notebook/${notebookId}/tasks/task/${currentTaskId}/subtask`, { title: sub.title });
-        setTaskGroup(res.data);
+        const res = await api.post(
+          `/notebook/${notebookId}/tasks/${currentTaskId}/subtask`,
+          { title: sub.title },
+        );
+        setTaskGroup(unwrapData(res.data));
       }
       toast.success("Subtask saved", { autoClose: 800 });
     } catch (err) {
-      console.error("Save subtask failed:", err);
+      logger.error("Save subtask failed:", getErrorMessage(err));
       toast.error("Failed to save subtask");
     }
   };
@@ -119,10 +143,10 @@ export default function TaskPage() {
     const sub = taskGroup.tasks[index];
     setSubTaskToDelete({ index, title: sub.title });
     setShowDeleteConfirm(true);
-  }
+  };
 
   const confirmDeleteSubtask = () => {
-    const index = subTaskToDelete.index
+    const index = subTaskToDelete.index;
     const sub = taskGroup.tasks[index];
     // remove locally first
     setTaskGroup((prev) => ({
@@ -134,14 +158,18 @@ export default function TaskPage() {
     if (currentTaskId && sub && sub._id) {
       (async () => {
         try {
-          await api.delete(`/notebook/${notebookId}/tasks/task/${currentTaskId}/subtask/${sub._id}`);
+          await api.delete(
+            `/notebook/${notebookId}/tasks/${currentTaskId}/subtask/${sub._id}`,
+          );
           // refresh group from server
-          const res = await api.get(`/notebook/${notebookId}/tasks/${currentTaskId}`);
-          setTaskGroup(res.data);
+          const res = await api.get(
+            `/notebook/${notebookId}/tasks/${currentTaskId}`,
+          );
+          setTaskGroup(unwrapData(res.data));
           setSubTaskToDelete(null);
           setShowDeleteConfirm(false);
         } catch (err) {
-          console.error("Delete subtask failed:", err);
+          logger.error("Delete subtask failed:", getErrorMessage(err));
           toast.error("Failed to delete subtask");
         }
       })();
@@ -155,24 +183,31 @@ export default function TaskPage() {
     // optimistic update
     setTaskGroup((prev) => ({
       ...prev,
-      tasks: prev.tasks.map((t, i) => (i === index ? { ...t, completed: newCompleted } : t)),
+      tasks: prev.tasks.map((t, i) =>
+        i === index ? { ...t, completed: newCompleted } : t,
+      ),
     }));
 
     // persist toggle via subtask update endpoint if possible
     if (currentTaskId && sub && sub._id) {
       (async () => {
         try {
-          const res = await api.put(`/notebook/${notebookId}/tasks/task/${currentTaskId}/subtask/${sub._id}`, { completed: newCompleted });
-          setTaskGroup(res.data);
+          const res = await api.put(
+            `/notebook/${notebookId}/tasks/${currentTaskId}/subtask/${sub._id}`,
+            { completed: newCompleted },
+          );
+          setTaskGroup(unwrapData(res.data));
         } catch (err) {
-          console.error("Toggle failed:", err);
+          logger.error("Toggle failed:", getErrorMessage(err));
           toast.error("Failed to update subtask");
           // revert optimistic update by refetching
           try {
-            const fresh = await api.get(`/notebook/${notebookId}/tasks/${currentTaskId}`);
-            setTaskGroup(fresh.data);
+            const fresh = await api.get(
+              `/notebook/${notebookId}/tasks/${currentTaskId}`,
+            );
+            setTaskGroup(unwrapData(fresh.data));
           } catch (e2) {
-            console.error(e2);
+            logger.error("Revert toggle failed:", getErrorMessage(e2));
           }
         }
       })();
@@ -237,8 +272,9 @@ export default function TaskPage() {
                       e.currentTarget.blur();
                     }
                   }}
-                  className={`flex-1 bg-transparent border-none focus:outline-none ${t.completed ? "line-through text-gray-500" : ""
-                    }`}
+                  className={`flex-1 bg-transparent border-none focus:outline-none ${
+                    t.completed ? "line-through text-gray-500" : ""
+                  }`}
                 />
               </div>
               <button
@@ -281,6 +317,5 @@ export default function TaskPage() {
         onCancel={() => setShowDeleteConfirm(false)}
       />
     </div>
-
   );
 }
