@@ -1,22 +1,18 @@
+import asyncHandler from "express-async-handler";
 import {
   getUserDetailsService,
   updateUserDetailsService,
 } from "../services/userDetailsService.js";
+import { sendSuccess } from "../utils/response.js";
+import logger from "../utils/logger.js";
 
-export const getUserDetails = async (req, res) => {
-  try {
-    const details = await getUserDetailsService(req.user._id);
-    res.json(details);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+export const getUserDetails = asyncHandler(async (req, res) => {
+  logger.info(`Fetching user details for ${req.user._id}`);
+  const details = await getUserDetailsService(req.user._id);
+  return sendSuccess(res, 200, details, "User details fetched successfully");
+});
 
-export const updateUserDetails = async (req, res) => {
-  try {
-    const updated = await updateUserDetailsService(req.user._id, req.body);
-    res.json(updated);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+export const updateUserDetails = asyncHandler(async (req, res) => {
+  const updated = await updateUserDetailsService(req.user._id, req.body);
+  return sendSuccess(res, 200, updated, "User details updated successfully");
+});

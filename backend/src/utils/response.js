@@ -1,3 +1,5 @@
+import logger from "./logger.js";
+
 export const sendSuccess = (
   res,
   statusCode = 200,
@@ -11,6 +13,14 @@ export const sendError = (
   res,
   statusCode = 500,
   message = "Something went wrong",
+  details = null,
 ) => {
-  return res.status(statusCode).json({ success: false, message });
+  if (statusCode >= 500) {
+    logger.error(message);
+  }
+
+  const payload = { success: false, message };
+  if (details) payload.details = details;
+
+  return res.status(statusCode).json(payload);
 };

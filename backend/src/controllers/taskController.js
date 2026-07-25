@@ -1,61 +1,88 @@
 import asyncHandler from "express-async-handler";
 import * as taskService from "../services/taskService.js";
+import { sendSuccess } from "../utils/response.js";
+import logger from "../utils/logger.js";
 
-// Create task
 export const createTask = asyncHandler(async (req, res) => {
-  const task = await taskService.createTask(req.user._id,req.params.notebookId, req.body);
-  res.status(201).json(task);
+  logger.info(
+    `Creating task in notebook ${req.params.notebookId} for user ${req.user._id}`,
+  );
+  const task = await taskService.createTask(
+    req.user._id,
+    req.params.notebookId,
+    req.body,
+  );
+  return sendSuccess(res, 201, task, "Task created successfully");
 });
 
-// Get all tasks for notebook
 export const getTasks = asyncHandler(async (req, res) => {
-  const tasks = await taskService.getTasksByNotebook(req.user._id,req.params.notebookId);
-  res.json(tasks);
+  const tasks = await taskService.getTasksByNotebook(
+    req.user._id,
+    req.params.notebookId,
+  );
+  return sendSuccess(res, 200, tasks, "Tasks fetched successfully");
 });
 
-// Get single task
 export const getTask = asyncHandler(async (req, res) => {
-  const task = await taskService.getTaskById(req.user._id,req.params.taskId);
-  res.json(task);
+  const task = await taskService.getTaskById(req.user._id, req.params.taskId);
+  return sendSuccess(res, 200, task, "Task fetched successfully");
 });
 
-// Update task
 export const updateTask = asyncHandler(async (req, res) => {
-  const updatedTask = await taskService.updateTask(req.user._id,req.params.taskId, req.body);
-  res.json(updatedTask);
+  const updatedTask = await taskService.updateTask(
+    req.user._id,
+    req.params.taskId,
+    req.body,
+  );
+  return sendSuccess(res, 200, updatedTask, "Task updated successfully");
 });
 
-// Delete task
 export const deleteTask = asyncHandler(async (req, res) => {
-  const result = await taskService.deleteTask(req.user._id,req.params.taskId);
-  res.json(result);
+  const result = await taskService.deleteTask(req.user._id, req.params.taskId);
+  return sendSuccess(res, 200, result, "Task deleted successfully");
 });
 
 export const moveToTrashTask = asyncHandler(async (req, res) => {
-  const result = await taskService.moveToTrashTask(req.user._id, req.params.taskId);
-  res.json(result);
+  const result = await taskService.moveToTrashTask(
+    req.user._id,
+    req.params.taskId,
+  );
+  return sendSuccess(res, 200, result, "Task moved to trash successfully");
 });
 
 export const toggleTask = asyncHandler(async (req, res) => {
-    const updatedSubTask = await taskService.toggleTask(req.user._id,req.params.taskId, req.body.subTaskId);
-    res.json(updatedSubTask);
-});
-
-// Add a subtask
-export const addSubtask = asyncHandler(async (req, res) => {
-  const subtask = await taskService.addSubtask(req.user._id, req.params.taskId, req.body);
-  res.status(201).json(subtask);
-});
-
-// Update a subtask
-export const updateSubtask = asyncHandler(async (req, res) => {
-  const subtask = await taskService.updateSubtask(req.user._id,req.params.taskId,req.params.subtaskId,req.body);
-  res.json(subtask);
-});
-
-// Delete a subtask
-export const deleteSubtask = asyncHandler(async (req, res) => {
-  const result = await taskService.deleteSubtask(req.user._id,req.params.taskId,req.params.subtaskId
+  const updatedSubTask = await taskService.toggleTask(
+    req.user._id,
+    req.params.taskId,
+    req.body.subTaskId,
   );
-  res.json(result);
+  return sendSuccess(res, 200, updatedSubTask, "Task updated successfully");
+});
+
+export const addSubtask = asyncHandler(async (req, res) => {
+  const subtask = await taskService.addSubtask(
+    req.user._id,
+    req.params.taskId,
+    req.body,
+  );
+  return sendSuccess(res, 201, subtask, "Subtask created successfully");
+});
+
+export const updateSubtask = asyncHandler(async (req, res) => {
+  const subtask = await taskService.updateSubtask(
+    req.user._id,
+    req.params.taskId,
+    req.params.subtaskId,
+    req.body,
+  );
+  return sendSuccess(res, 200, subtask, "Subtask updated successfully");
+});
+
+export const deleteSubtask = asyncHandler(async (req, res) => {
+  const result = await taskService.deleteSubtask(
+    req.user._id,
+    req.params.taskId,
+    req.params.subtaskId,
+  );
+  return sendSuccess(res, 200, result, "Subtask deleted successfully");
 });
