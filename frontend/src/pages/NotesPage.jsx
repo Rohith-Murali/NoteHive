@@ -20,7 +20,7 @@ export default function NotePage() {
   const [titleTouched, setTitleTouched] = useState(false);
   const saveTimer = useRef(null);
   const titleInputRef = useRef(null);
-  const SAVE_DELAY_MS = 300;
+  const SAVE_DELAY_MS = 1000;
 
   // --- Fetch Note from DB ---
   useEffect(() => {
