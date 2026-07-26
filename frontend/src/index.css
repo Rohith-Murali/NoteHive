@@ -19,6 +19,7 @@
   --success-color: #10b981;
   --success-bg: rgba(16,185,129,0.08);
   --danger-bg: rgba(220,53,69,0.08);
+  min-width: 360px;
 }
 
 [data-bs-theme="light"] {

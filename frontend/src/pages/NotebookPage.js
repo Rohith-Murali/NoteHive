@@ -90,9 +90,11 @@ export default function NotebookPage() {
       await api.put(
         `/notebook/${notebookId}/${selectedType}/${selectedItem._id}/trash`,
       );
-      if (selectedType === "notes")
+      if (selectedType === "notes") {
         setNotes(notes.filter((n) => n._id !== selectedItem._id));
-      else setTasks(tasks.filter((t) => t._id !== selectedItem._id));
+      } else {
+        setTasks(tasks.filter((t) => t._id !== selectedItem._id));
+      }
     } catch (err) {
       logger.error("Delete error:", getErrorMessage(err));
     }
@@ -100,39 +102,42 @@ export default function NotebookPage() {
   };
 
   return (
-    <div className={`flex h-screen ${showConfirm ? "backdrop-blur-sm" : ""}`}>
-      <main className="flex-1 overflow-y-auto p-6 relative">
+    <div
+      className={`flex  h-full w-full overflow-x-hidden ${showConfirm ? "backdrop-blur-sm" : ""}`}
+    >
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 relative">
         <button
           onClick={() => navigate(-1)}
           className="mb-4 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
         >
           ← Back
         </button>
+
         {isLoading ? (
           <div className="flex h-[70vh] items-center justify-center">
-            {isLoading && (
-              <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                <div>
-                  <p className="text-sm font-medium text-slate-800">
-                    Loading notebook...
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Fetching the latest notes and tasks.
-                  </p>
-                </div>
+            <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <div>
+                <p className="text-sm font-medium text-slate-800">
+                  Loading notebook...
+                </p>
+                <p className="text-xs text-slate-500">
+                  Fetching the latest notes and tasks.
+                </p>
               </div>
-            )}
+            </div>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-semibold mb-8">{notebook.title}</h1>
-            {/* Header bar */}
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <div className="flex gap-4 items-center">
+            <h1 className="text-2xl font-semibold mb-6 sm:mb-8 break-words">
+              {notebook.title}
+            </h1>
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6 border-b pb-4">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
                 {/* Sort */}
                 <button
-                  className="flex items-center gap-2 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 w-full sm:w-auto"
                   onClick={() =>
                     setSortOption(sortOption === "date" ? "name" : "date")
                   }
@@ -141,12 +146,12 @@ export default function NotebookPage() {
                 </button>
 
                 {/* Filter */}
-                <div className="flex items-center gap-2">
-                  <FaFilter />
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <FaFilter className="shrink-0" />
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="border px-3 py-2 rounded"
+                    className="border px-3 py-2 rounded w-full sm:w-auto"
                   >
                     <option value="all">All</option>
                     <option value="notes">Notes</option>
@@ -155,17 +160,18 @@ export default function NotebookPage() {
                 </div>
               </div>
 
-              {/* Add Menu */}
-              <div className="relative">
+              {/* Add */}
+              <div className="relative self-start sm:self-auto">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full sm:w-auto"
                 >
-                  <FaPlus /> Add
+                  <FaPlus />
+                  Add
                 </button>
 
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 border rounded-lg bg-gray-200 shadow-md z-20">
+                  <div className="absolute right-0 mt-2 min-w-[170px] border rounded-lg bg-gray-200 shadow-md z-20">
                     <button
                       onClick={() => {
                         handleAddNote();
@@ -189,43 +195,40 @@ export default function NotebookPage() {
               </div>
             </div>
 
-            {/* Cards Grid */}
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
+            {/* Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 sm:gap-5 mt-4">
               {!isLoading && [...visibleNotes, ...visibleTasks].length === 0 ? (
-                <h1 className="text-xl font-semibold mb-8">
+                <h1 className="text-xl font-semibold">
                   Add new notes or tasks
                 </h1>
               ) : (
-                ""
-              )}
-              {[...visibleNotes, ...visibleTasks].map((item) => (
-                <div key={item._id} className="relative group">
-                  <NoteCard
-                    note={{
-                      ...item,
-                      type: item.tasks ? "task" : "text",
-                    }}
-                    onOpen={handleOpenItem}
-                  />
-                  {/* Hover icons */}
-                  <div className="absolute top-0 right-0 flex">
-                    <button
-                      className="p-2 rounded-full bg-red-100 hover:bg-red-200"
-                      onClick={() =>
-                        handleDelete(item, item.tasks ? "tasks" : "notes")
-                      }
-                    >
-                      <FiTrash2 />
-                    </button>
+                [...visibleNotes, ...visibleTasks].map((item) => (
+                  <div key={item._id} className="relative group">
+                    <NoteCard
+                      note={{
+                        ...item,
+                        type: item.tasks ? "task" : "text",
+                      }}
+                      onOpen={handleOpenItem}
+                    />
+                    <div className="absolute top-2 right-2 flex opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <button
+                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 shadow"
+                        onClick={() =>
+                          handleDelete(item, item.tasks ? "tasks" : "notes")
+                        }
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </>
         )}
       </main>
 
-      {/* Confirm Dialog */}
       <ConfirmDialog
         show={showConfirm}
         title="Delete Confirmation"
