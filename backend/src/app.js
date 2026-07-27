@@ -18,12 +18,21 @@ dotenv.config();
 const app = express();
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-    credentials: true,
-  }),
-);
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://note-hive-tawny.vercel.app",
+    "https://note-hive-gjrji5w5n-rohith-murali11.vercel.app"
+];
+app.use(cors({
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
 app.use(cookieParser());
 app.use(requestLogger);
 app.use(
