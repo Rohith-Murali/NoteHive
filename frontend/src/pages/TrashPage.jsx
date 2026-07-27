@@ -17,6 +17,9 @@ export default function TrashPage() {
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
   const [notebookToDelete, setNotebookToDelete] = useState(null);
   const [notebookToRestore, setNotebookToRestore] = useState(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedType, setSelectedType] = useState("");
   const [deleteType, setDeleteType] = useState("");
   const [restoreType, setRestoreType] = useState("");
 
@@ -68,6 +71,9 @@ export default function TrashPage() {
       }
 
       await api.put(`${endpoint}/trash`);
+      await fetchTrash();
+      setNotebookToRestore(null);
+      setShowRestoreConfirm(false);
 
       setTrashData((prev) => ({
         ...prev,
@@ -124,6 +130,12 @@ export default function TrashPage() {
     }
   };
 
+  const handleCardClick = (type, item) => {
+    setSelectedItem(item);
+    setSelectedType(type);
+    setShowViewDialog(true);
+  };
+
   useEffect(() => {
     fetchTrash();
   }, []);
@@ -147,19 +159,23 @@ export default function TrashPage() {
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 mt-4">
                 {trashData[section].map((item) => (
                   <div key={item._id} className="relative group">
-                    <NoteCard note={item} />
+                    <NoteCard
+                      note={item}
+                      onOpen={() => handleCardClick(section.slice(0, -1), item)}
+                    />
 
                     <div className="absolute top-0 right-0">
-                      <button
-                        onClick={() =>
-                          handleRestore(section.slice(0, -1), item)
-                        }
-                        className="p-2 rounded-full bg-green-100 hover:bg-green-200"
-                        title="Restore"
-                      >
-                        <FiRotateCcw />
-                      </button>
-
+                      {!(section !== "notebooks" && item.parentInTrash) && (
+                        <button
+                          onClick={() =>
+                            handleRestore(section.slice(0, -1), item)
+                          }
+                          className="p-2 rounded-full bg-green-100 hover:bg-green-200"
+                          title="Restore"
+                        >
+                          <FiRotateCcw />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDelete(section.slice(0, -1), item)}
                         className="p-2 rounded-full bg-red-100 hover:bg-red-200"
@@ -190,6 +206,32 @@ export default function TrashPage() {
           message="This action cannot be undone."
           onConfirm={confirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}
+        />
+        <ConfirmDialog
+          show={showViewDialog}
+          title={`"${selectedItem?.title}" is in the Bin`}
+          message={
+            selectedItem?.parentInTrash
+              ? "This item belongs to a notebook that is also in the Bin. Restore the notebook first."
+              : "Restore this item to view or edit its contents."
+          }
+          text={selectedItem?.parentInTrash ? "OK" : "Restore"}
+          onConfirm={() => {
+            if (selectedItem?.parentInTrash) {
+              setShowViewDialog(false);
+              setSelectedItem(null);
+              return;
+            }
+
+            setNotebookToRestore(selectedItem);
+            setRestoreType(selectedType);
+            setShowViewDialog(false);
+            setShowRestoreConfirm(true);
+          }}
+          onCancel={() => {
+            setShowViewDialog(false);
+            setSelectedItem(null);
+          }}
         />
       </main>
     </div>
