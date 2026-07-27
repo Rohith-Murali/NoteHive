@@ -34,17 +34,17 @@ export default function Dashboard() {
     return [];
   };
 
-  const fetchNotebooks = async () => {
-    try {
-      const res = await api.get("/notebook");
-      setNotebooks(extractList(res.data));
-      logger.info("Dashboard notebooks loaded", res.data);
-    } catch (err) {
-      logger.error("Fetch error:", getErrorMessage(err));
-    }
-  };
-
   useEffect(() => {
+    const fetchNotebooks = async () => {
+      try {
+        const res = await api.get("/notebook");
+        setNotebooks(extractList(res.data));
+        logger.info("Dashboard notebooks loaded", res.data);
+      } catch (err) {
+        logger.error("Fetch error:", getErrorMessage(err));
+      }
+    };
+
     fetchNotebooks();
   }, []);
 
