@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
@@ -12,6 +17,8 @@ import SettingsPage from "./pages/SettingsPage";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import ProfilePage from "./pages/ProfilePage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   const { theme, fontSize } = useSelector((state) => state.settings);
@@ -20,7 +27,11 @@ function App() {
     // compute effective theme: if user selected 'system' follow OS preference
     const getEffectiveTheme = () => {
       if (theme === "system") {
-        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+        if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        )
+          return "dark";
         return "light";
       }
       return theme;
@@ -41,7 +52,9 @@ function App() {
     };
     if (window.matchMedia) {
       mq = window.matchMedia("(prefers-color-scheme: dark)");
-      mq.addEventListener ? mq.addEventListener("change", handleChange) : mq.addListener(handleChange);
+      mq.addEventListener
+        ? mq.addEventListener("change", handleChange)
+        : mq.addListener(handleChange);
     }
 
     // Set font size on the root so Tailwind/rem-based sizes scale with settings
@@ -53,43 +66,58 @@ function App() {
     }
 
     return () => {
-      if (mq) mq.removeEventListener ? mq.removeEventListener("change", handleChange) : mq.removeListener(handleChange);
+      if (mq)
+        mq.removeEventListener
+          ? mq.removeEventListener("change", handleChange)
+          : mq.removeListener(handleChange);
     };
   }, [theme, fontSize]);
-  
+
   return (
-    <Router>
-      <Routes>
-        {/* Public */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Public */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* Private */}
-        {/* Private routes are wrapped by PrivateRoute, then by Layout so all private pages share the layout */}
-        <Route element={<PrivateRoute />}>
-          <Route
-            element={
-              <Layout>
-                <Outlet />
-              </Layout>
-            }
-          >
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/notebook/:notebookId" element={<NotebookPage />} />
-            <Route path="/notebook/:notebookId/notes/new" element={<NotesPage />} />
-            <Route path="/notebook/:notebookId/tasks/new" element={<TasksPage />} />
-            <Route path="/notebook/:notebookId/notes/:noteId" element={<NotesPage />} />
-            <Route path="/notebook/:notebookId/tasks/:taskId" element={<TasksPage />} />
-            <Route path="/trash" element={<TrashPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+          {/* Private */}
+          <Route element={<PrivateRoute />}>
+            <Route
+              element={
+                <Layout>
+                  <Outlet />
+                </Layout>
+              }
+            >
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/notebook/:notebookId" element={<NotebookPage />} />
+              <Route
+                path="/notebook/:notebookId/notes/new"
+                element={<NotesPage />}
+              />
+              <Route
+                path="/notebook/:notebookId/tasks/new"
+                element={<TasksPage />}
+              />
+              <Route
+                path="/notebook/:notebookId/notes/:noteId"
+                element={<NotesPage />}
+              />
+              <Route
+                path="/notebook/:notebookId/tasks/:taskId"
+                element={<TasksPage />}
+              />
+              <Route path="/trash" element={<TrashPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Default redirect */}
-        <Route path="*" element={<LoginPage />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

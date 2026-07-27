@@ -7,43 +7,34 @@ import {
   FiLogOut,
   FiSettings,
 } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
-export default function Sidebar({ onWidthChange }) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+export default function Sidebar({ onWidthChange, isMobile }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user } = useSelector((state) => state.auth);
-  const actualCollapsed = collapsed && (!hovered || !isMobile);
+  // true = expanded, false = collapsed/icon rail
+  const [expanded, setExpanded] = useState(!isMobile);
 
-  // Responsive collapse/expand based on screen width
+  // Reset state when screen size changes
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 992) {
-        // below lg breakpoint
-        setCollapsed(true);
-        setIsMobile(true);
-      } else {
-        setCollapsed(false);
-        setIsMobile(false);
-      }
-    };
+    setExpanded(!isMobile);
+  }, [isMobile]);
 
-    handleResize(); // run on mount
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [user]);
-
-  // Notify parent layout (Dashboard, etc.) about width changes
+  // Inform Layout only on desktop
   useEffect(() => {
-    const width = actualCollapsed ? 100 : 256;
-    if (onWidthChange) onWidthChange(width);
-  }, [actualCollapsed, onWidthChange]);
+    if (isMobile) {
+      onWidthChange?.(0);
+    } else {
+      onWidthChange?.(expanded ? 200 : 80);
+    }
+  }, [expanded, isMobile, onWidthChange]);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -51,69 +42,128 @@ export default function Sidebar({ onWidthChange }) {
   };
 
   const menuItems = [
-    { icon: <FiBook />, label: "Notebooks", path: "/" },
-    { icon: <FiTrash2 />, label: "Trash", path: "/trash" },
-    { icon: <FiSettings />, label: "Settings", path: "/settings" },
-    { icon: <FiUser />, label: "Profile", path: "/profile" }
+    {
+      icon: <FiBook size={18} />,
+      label: "Notebooks",
+      path: "/",
+    },
+    {
+      icon: <FiTrash2 size={18} />,
+      label: "Trash",
+      path: "/trash",
+    },
+    {
+      icon: <FiSettings size={18} />,
+      label: "Settings",
+      path: "/settings",
+    },
+    {
+      icon: <FiUser size={18} />,
+      label: "Profile",
+      path: "/profile",
+    },
   ];
 
   return (
     <aside
-      className={`${actualCollapsed ? "w-28" : "w-64"}
-        bg-sidebar h-screen shadow-md flex flex-col justify-between fixed left-0 top-0 transition-all duration-300 z-50`}
-      onMouseEnter={() => isMobile && setHovered(true)}
-      onMouseLeave={() => isMobile && setHovered(false)}
+      className={`
+        fixed left-0 top-0 z-50
+        h-screen
+        bg-sidebar
+        shadow-lg
+        overflow-hidden
+        transition-all
+        duration-300
+        ${expanded ? "w-55" : "w-22"}
+      `}
+      style={{
+        boxShadow: expanded && isMobile ? "0 0 0 9999px rgba(0,0,0,.35)" : "",
+      }}
     >
-      {/* Top Section */}
-      <div className="flex flex-col p-4">
-        {/* Header / Logo */}
-        <div className="flex items-center justify-between mb-8">
-          {!actualCollapsed && (
-            <h1 className="text-2xl font-semibold text-[var(--primary-color)]">
-              NoteHive
-            </h1>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="text-gray-500 hover:text-[var(--primary-color)]"
-          >
-            <FiMenu size={22} />
-          </button>
-        </div>
+      <div className="flex h-full flex-col justify-between">
+        {/* Top */}
+        <div className="p-4">
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
+            {expanded && (
+              <h1 className="whitespace-nowrap text-2xl font-semibold text-[var(--primary-color)]">
+                NoteHive
+              </h1>
+            )}
 
-        {/* Menu */}
-        <nav className="space-y-2">
-          {menuItems.map((item, idx) => (
             <button
-              key={idx}
-              onClick={() => navigate(item.path)}
-              className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition"
-              style={{ color: "var(--text-color)" }}
+              onClick={() => setExpanded((prev) => !prev)}
+              className="shrink-0 text-gray-600 hover:text-[var(--primary-color)]"
             >
-              {item.icon}
-              {!actualCollapsed && <span>{item.label}</span>}
+              <FiMenu size={18} />
             </button>
-          ))}
-        </nav>
-      </div>
+          </div>
 
-      {/* Profile Section */}
-      <div className="relative p-4 border-t">
-        <button
-          className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-[var(--secondary-color)] transition"
-          onClick={handleLogout}
-        >
-          {!actualCollapsed && (
-            <div className="flex-1 text-left">
-              <p
-                className="text-sm font-medium"
+          {/* Menu */}
+          <nav className="space-y-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => handleNavigate(item.path)}
+                className={`
+                  w-full
+                  flex
+                  items-center
+                  rounded-lg
+                  px-3
+                  py-3
+                  transition
+                  hover:bg-[var(--secondary-color)]
+                  ${
+                    expanded
+                      ? "justify-start gap-3"
+                      : "justify-center"
+                  }
+                `}
                 style={{ color: "var(--text-color)" }}
               >
-                <FiLogOut />Logout
-              </p>
-            </div>
-          )}
-        </button>
+                {item.icon}
+
+                {expanded && (
+                  <span className="whitespace-nowrap">
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Bottom */}
+        <div className="border-t p-4">
+          <button
+            onClick={handleLogout}
+            className={`
+              w-full
+              flex
+              items-center
+              rounded-lg
+              px-3
+              py-3
+              transition
+              hover:bg-[var(--secondary-color)]
+              ${
+                expanded
+                  ? "justify-start gap-3"
+                  : "justify-center"
+              }
+            `}
+            style={{ color: "var(--text-color)" }}
+          >
+            <FiLogOut size={18} />
+
+            {expanded && (
+              <span className="whitespace-nowrap">
+                Logout
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );
