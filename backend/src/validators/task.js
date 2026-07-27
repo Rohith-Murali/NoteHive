@@ -7,6 +7,7 @@ export const taskSchema = z.object({
 });
 
 export const subtaskSchema = z.object({
+  title: z.string().min(2).max(200),
   completed: z.boolean().optional(),
 });
 

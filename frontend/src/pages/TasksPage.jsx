@@ -210,6 +210,7 @@ export default function TaskPage() {
 
   const handleToggle = (index) => {
     const sub = taskGroup.tasks[index];
+    const newTitle = sub.title;
     const newCompleted = !sub.completed;
 
     // optimistic update
@@ -226,7 +227,7 @@ export default function TaskPage() {
         try {
           const res = await api.put(
             `/notebook/${notebookId}/tasks/${currentTaskId}/subtask/${sub._id}`,
-            { completed: newCompleted },
+            { completed: newCompleted,title: newTitle },
           );
           setTaskGroup(unwrapData(res.data));
         } catch (err) {
